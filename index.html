@@ -903,7 +903,15 @@
         };
 
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'tkp7-accounting-app';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "demo", projectId: "demo" };
+        const firebaseConfig = {
+  apiKey: "AIzaSyAs-M2LnjgE7OADtio6bgGyn1TP58WQXwY",
+  authDomain: "tkp7-accounting.firebaseapp.com",
+  projectId: "tkp7-accounting",
+  storageBucket: "tkp7-accounting.firebasestorage.app",
+  messagingSenderId: "125667880474",
+  appId: "1:125667880474:web:94d9aec9d20af3d311aba3",
+  measurementId: "G-ZML2XNBQ1N"
+};
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
