@@ -1,500 +1,1211 @@
-    <!-- Tab 1: Dashboard -->
-    <section id="tab-dashboard" class="space-y-6">
-        <!-- Header & Time Filter -->
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-gray-800">แดชบอร์ดภาพรวม</h1>
-                <p class="text-xs text-gray-500 mt-1">สรุปข้อมูลสถานะทางการเงิน รายรับ-รายจ่าย และภาษี (ซิงค์ออนไลน์แบบเรียลไทม์)</p>
-            </div>
-            <div class="flex items-center space-x-1 bg-pink-50 p-1.5 rounded-xl border border-pink-100 text-xs font-semibold">
-                <button id="dashPeriodMonth" onclick="setDashboardPeriod('month')" class="px-4 py-2 pink-gradient text-white rounded-lg shadow-sm font-bold transition">เดือนนี้</button>
-                <button id="dashPeriodQuarter" onclick="setDashboardPeriod('quarter')" class="px-4 py-2 hover:text-brand-700 rounded-lg text-gray-600 transition font-medium">ไตรมาสนี้</button>
-                <button id="dashPeriodYear" onclick="setDashboardPeriod('year')" class="px-4 py-2 hover:text-brand-700 rounded-lg text-gray-600 transition font-medium">ปีนี้</button>
-            </div>
-        </div>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TKP7 Accounting App</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font: Prompt or Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fdf2f4',
+                            100: '#fbe8ec',
+                            500: '#e11d48',
+                            600: '#be123c',
+                            700: '#9f1239'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .pink-gradient {
+            background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
+        }
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #faf7f8;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex bg-gray-50 text-gray-800">
 
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-white p-5 rounded-2xl border border-pink-100 shadow-sm space-y-2">
-                <div class="flex justify-between items-center text-gray-500 text-xs font-semibold">
-                    <span>ยอดขายรวม (Paid)</span>
-                    <i class="fa-solid fa-wallet text-emerald-500 text-base"></i>
+    <!-- Sidebar (Fixed Left) -->
+    <aside class="fixed inset-y-0 left-0 z-20 w-64 bg-white border-r border-pink-100 flex flex-col justify-between shadow-sm">
+        <div>
+            <!-- Logo Section -->
+            <div class="p-6 border-b border-pink-100 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="pink-gradient text-white font-bold p-2.5 rounded-xl shadow">
+                        <i class="fa-solid fa-calculator text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-gray-900 tracking-wide text-base">TKP7 Accounting</h1>
+                        <p class="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ออนไลน์ (Cloud Sync)
+                        </p>
+                    </div>
                 </div>
-                <div class="text-xl font-bold text-emerald-600" id="dashTotalSales">฿0.00</div>
             </div>
-            <div class="bg-white p-5 rounded-2xl border border-pink-100 shadow-sm space-y-2">
-                <div class="flex justify-between items-center text-gray-500 text-xs font-semibold">
-                    <span>รายจ่ายรวม (Expenses)</span>
-                    <i class="fa-solid fa-receipt text-rose-500 text-base"></i>
-                </div>
-                <div class="text-xl font-bold text-rose-600" id="dashTotalExpenses">฿0.00</div>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-pink-100 shadow-sm space-y-2">
-                <div class="flex justify-between items-center text-gray-500 text-xs font-semibold">
-                    <span>กำไรสุทธิ (Net Profit)</span>
-                    <i class="fa-solid fa-chart-line text-brand-500 text-base"></i>
-                </div>
-                <div class="text-xl font-bold text-brand-700" id="dashNetProfit">฿0.00</div>
-            </div>
-            <div class="bg-white p-5 rounded-2xl border border-pink-100 shadow-sm space-y-2">
-                <div class="flex justify-between items-center text-gray-500 text-xs font-semibold">
-                    <span>ยอดรอชำระ (Pending)</span>
-                    <i class="fa-solid fa-clock text-amber-500 text-base"></i>
-                </div>
-                <div class="text-xl font-bold text-amber-600" id="dashPendingAmount">฿0.00</div>
-            </div>
-        </div>
 
-        <!-- Recent Transactions -->
-        <div class="bg-white rounded-2xl border border-pink-100 shadow-sm p-6 space-y-4">
-            <h3 class="text-base font-bold text-gray-800 flex items-center gap-2">
-                <i class="fa-solid fa-clock-rotate-left text-brand-600"></i> รายการเอกสารล่าสุด
-            </h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
-                    <thead class="bg-pink-50 text-brand-700 font-bold uppercase">
-                        <tr>
-                            <th class="py-3 px-2">เลขที่</th>
-                            <th class="py-3 px-2">วันที่</th>
-                            <th class="py-3 px-2">ลูกค้า</th>
-                            <th class="py-3 px-2 text-right">ยอดรวม</th>
-                            <th class="py-3 px-2 text-center">สถานะ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dashRecentDocsTable" class="divide-y divide-pink-50">
-                        <!-- Dynamic Render -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    <!-- Tab 2: Documents -->
-    <section id="tab-documents" class="hidden space-y-6">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h1 class="text-2xl font-bold text-gray-800">เอกสารการขาย</h1>
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-                <div class="relative flex-1 sm:w-64">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                    <input type="text" id="searchDocumentsInput" oninput="renderDocumentsTable()" placeholder="ค้นหาเอกสาร, ลูกค้า..." class="w-full pl-9 pr-3 py-2 bg-white border border-pink-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 shadow-sm">
-                </div>
-                <button onclick="openNewDocModal()" class="pink-gradient hover:opacity-95 text-white px-5 py-2.5 rounded-xl font-bold shadow flex items-center justify-center gap-2 transition">
-                    <i class="fa-solid fa-plus"></i> ออกเอกสารใหม่
+            <!-- Navigation Menu -->
+            <nav class="p-4 space-y-1.5 text-sm font-medium">
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-brand-700 bg-pink-50 shadow-sm font-semibold">
+                    <i class="fa-solid fa-chart-pie w-5 text-base"></i> แดชบอร์ดภาพรวม
                 </button>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-pink-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-pink-50 text-xs font-bold text-brand-700 uppercase">
-                        <tr>
-                            <th class="p-4">ประเภท</th>
-                            <th class="p-4">เลขที่เอกสาร</th>
-                            <th class="p-4">วันที่</th>
-                            <th class="p-4">ลูกค้า</th>
-                            <th class="p-4 text-right">ยอดรวม (รวม VAT)</th>
-                            <th class="p-4 text-center">สถานะ</th>
-                            <th class="p-4 text-center">จัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="documentsTable" class="divide-y divide-pink-50 text-sm">
-                        <!-- Dynamic Render -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    <!-- Tab 3: Expenses -->
-    <section id="tab-expenses" class="hidden space-y-6">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h1 class="text-2xl font-bold text-gray-800">บันทึกรายจ่าย</h1>
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-                <div class="relative flex-1 sm:w-64">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                    <input type="text" id="searchExpensesInput" oninput="renderExpensesTable()" placeholder="ค้นหารายจ่าย, ผู้ขาย..." class="w-full pl-9 pr-3 py-2 bg-white border border-pink-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 shadow-sm">
-                </div>
-                <button onclick="openNewExpenseModal()" class="pink-gradient hover:opacity-95 text-white px-5 py-2.5 rounded-xl font-bold shadow flex items-center justify-center gap-2 transition">
-                    <i class="fa-solid fa-plus"></i> บันทึกรายจ่ายใหม่
+                <button onclick="switchTab('documents')" id="nav-documents" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold">
+                    <i class="fa-solid fa-file-invoice-dollar w-5 text-base"></i> เอกสารการขาย
                 </button>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-pink-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-pink-50 text-xs font-bold text-brand-700 uppercase">
-                        <tr>
-                            <th class="p-4">วันที่</th>
-                            <th class="p-4">หมวดหมู่</th>
-                            <th class="p-4">รายละเอียด</th>
-                            <th class="p-4">ผู้ให้บริการ / ผู้ขาย</th>
-                            <th class="p-4 text-right">จำนวนเงิน (ก่อน VAT)</th>
-                            <th class="p-4 text-right">ภาษี VAT (7%)</th>
-                            <th class="p-4 text-right">หัก ณ ที่จ่าย (WHT)</th>
-                            <th class="p-4 text-right">ยอดชำระสุทธิ</th>
-                            <th class="p-4 text-center">หลักฐาน</th>
-                            <th class="p-4 text-center">จัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="expensesTable" class="divide-y divide-pink-50 text-sm">
-                        <!-- Dynamic Render -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    <!-- Tab 4: Products -->
-    <section id="tab-products" class="hidden space-y-6">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h1 class="text-2xl font-bold text-gray-800">สินค้าและบริการ</h1>
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-                <div class="relative flex-1 sm:w-64">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                    <input type="text" id="searchProductsInput" oninput="renderProductsTable()" placeholder="ค้นหารหัส หรือชื่อสินค้า..." class="w-full pl-9 pr-3 py-2 bg-white border border-pink-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 shadow-sm">
-                </div>
-                <button onclick="openProductModal()" class="pink-gradient hover:opacity-95 text-white px-5 py-2.5 rounded-xl font-bold shadow flex items-center justify-center gap-2 transition">
-                    <i class="fa-solid fa-plus"></i> เพิ่มสินค้าใหม่
+                <button onclick="switchTab('expenses')" id="nav-expenses" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold">
+                    <i class="fa-solid fa-receipt w-5 text-base"></i> บันทึกรายจ่าย
                 </button>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-2xl border border-pink-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-pink-50 text-xs font-bold text-brand-700 uppercase">
-                        <tr>
-                            <th class="p-4">รหัสสินค้า</th>
-                            <th class="p-4">ชื่อสินค้า / รายการ</th>
-                            <th class="p-4 text-right">ต้นทุน (บาท)</th>
-                            <th class="p-4 text-right">ราคาขาย (บาท)</th>
-                            <th class="p-4 text-center">คงเหลือในสต็อก</th>
-                            <th class="p-4 text-center">จัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="productsTable" class="divide-y divide-pink-50 text-sm">
-                        <!-- Dynamic Render -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </section>
-
-    <!-- Tab 5: Contacts -->
-    <section id="tab-contacts" class="hidden space-y-6">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h1 class="text-2xl font-bold text-gray-800">ผู้ติดต่อ (ลูกค้า / ผู้ขาย)</h1>
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-                <div class="relative flex-1 sm:w-64">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
-                    <input type="text" id="searchContactsInput" oninput="renderContactsTable()" placeholder="ค้นชื่อ, เลขภาษี, เบอร์โทร..." class="w-full pl-9 pr-3 py-2 bg-white border border-pink-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 shadow-sm">
-                </div>
-                <button onclick="openContactModal()" class="pink-gradient hover:opacity-95 text-white px-5 py-2.5 rounded-xl font-bold shadow flex items-center justify-center gap-2 transition">
-                    <i class="fa-solid fa-plus"></i> เพิ่มผู้ติดต่อ
+                <button onclick="switchTab('products')" id="nav-products" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold">
+                    <i class="fa-solid fa-box-archive w-5 text-base"></i> สินค้าและบริการ
                 </button>
-            </div>
+                <button onclick="switchTab('contacts')" id="nav-contacts" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold">
+                    <i class="fa-solid fa-address-book w-5 text-base"></i> ผู้ติดต่อ (ลูกค้า / ผู้ขาย)
+                </button>
+                <button onclick="switchTab('reports')" id="nav-reports" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold">
+                    <i class="fa-solid fa-chart-line w-5 text-base"></i> รายงานบัญชีและการเงิน
+                </button>
+            </nav>
         </div>
 
-        <div class="bg-white rounded-2xl border border-pink-100 shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-pink-50 text-xs font-bold text-brand-700 uppercase">
-                        <tr>
-                            <th class="p-4">ชื่อบริษัท / ผู้ติดต่อ</th>
-                            <th class="p-4">เลขประจำตัวผู้เสียภาษี</th>
-                            <th class="p-4">ที่อยู่</th>
-                            <th class="p-4">เบอร์โทรศัพท์</th>
-                            <th class="p-4">อีเมล</th>
-                            <th class="p-4 text-center">ประเภท</th>
-                            <th class="p-4 text-center">จัดการ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="contactsTable" class="divide-y divide-pink-50 text-sm">
-                        <!-- Dynamic Render -->
-                    </tbody>
-                </table>
-            </div>
+        <!-- Cloud User Footer -->
+        <div class="p-4 border-t border-pink-100 bg-pink-50/40 text-xs text-gray-500">
+            <span class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Cloud User ID:</span>
+            <span id="cloudUserId" class="font-mono font-bold text-brand-700 truncate block mt-0.5">Connecting...</span>
         </div>
-    </section>
+    </aside>
 
-    <!-- Tab 6: Reports -->
-    <section id="tab-reports" class="hidden space-y-6">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h1 class="text-2xl font-bold text-gray-800">รายงานบัญชีและการเงิน</h1>
-            
-            <!-- Month/Year Filter -->
-            <div class="flex items-center space-x-2 bg-white p-2 rounded-xl border border-pink-200 shadow-sm">
-                <span class="text-xs font-bold text-brand-700 pl-2"><i class="fa-solid fa-filter"></i> เลือกระยะเวลา:</span>
-                <select id="reportMonth" onchange="renderReports()" class="bg-pink-50 border border-pink-200 text-sm font-semibold text-gray-700 rounded-lg p-1.5 focus:outline-none focus:border-brand-500">
-                    <option value="0">มกราคม</option>
-                    <option value="1">กุมภาพันธ์</option>
-                    <option value="2">มีนาคม</option>
-                    <option value="3">เมษายน</option>
-                    <option value="4">พฤษภาคม</option>
-                    <option value="5">มิถุนายน</option>
-                    <option value="6">กรกฎาคม</option>
-                    <option value="7">สิงหาคม</option>
-                    <option value="8">กันยายน</option>
-                    <option value="9">ตุลาคม</option>
-                    <option value="10" selected>พฤศจิกายน</option>
-                    <option value="11">ธันวาคม</option>
-                </select>
-                <select id="reportYear" onchange="renderReports()" class="bg-pink-50 border border-pink-200 text-sm font-semibold text-gray-700 rounded-lg p-1.5 focus:outline-none focus:border-brand-500">
-                    <option value="2025">2025</option>
-                    <option value="2026" selected>2026</option>
-                </select>
+    <!-- Main Content Container -->
+    <main class="ml-64 flex-1 p-8 overflow-y-auto min-h-screen">
+
+        <!-- Tab 1: Dashboard -->
+        <section id="tab-dashboard" class="space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-800">แดชบอร์ดภาพรวม</h1>
+                    <p class="text-xs text-gray-500 mt-1">สรุปข้อมูลสถานะทางการเงิน รายรับ-รายจ่าย และภาษี (ซิงค์ออนไลน์แบบเรียลไทม์)</p>
+                </div>
+                <div class="flex items-center space-x-1 bg-pink-50 p-1.5 rounded-xl border border-pink-100 text-xs font-semibold">
+                    <button id="dashPeriodMonth" onclick="setDashboardPeriod('month')" class="px-4 py-2 pink-gradient text-white rounded-lg shadow-sm font-bold transition">เดือนนี้</button>
+                    <button id="dashPeriodQuarter" onclick="setDashboardPeriod('quarter')" class="px-4 py-2 hover:text-brand-700 rounded-lg text-gray-600 transition font-medium">ไตรมาสนี้</button>
+                    <button id="dashPeriodYear" onclick="setDashboardPeriod('year')" class="px-4 py-2 hover:text-brand-700 rounded-lg text-gray-600 transition font-medium">ปีนี้</button>
+                </div>
             </div>
-        </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="bg-white p-6 rounded-2xl border border-pink-100 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-brand-700 border-b border-pink-100 pb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-file-invoice"></i> สรุปกำไร-ขาดทุน ประจำเดือน
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-pink-100 shadow-sm space-y-2">
+                    <div class="flex justify-between items-center text-gray-500 text-xs font-semibold">
+                        <span>ยอดขายรวม (Paid)</span>
+                        <i class="fa-solid fa-wallet text-emerald-500 text-base"></i>
+                    </div>
+                    <div class="text-xl font-bold text-emerald-600" id="dashTotalSales">฿0.00</div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-pink-100 shadow-sm space-y-2">
+                    <div class="flex justify-between items-center text-gray-500 text-xs font-semibold">
+                        <span>รายจ่ายรวม (Expenses)</span>
+                        <i class="fa-solid fa-receipt text-rose-500 text-base"></i>
+                    </div>
+                    <div class="text-xl font-bold text-rose-600" id="dashTotalExpenses">฿0.00</div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-pink-100 shadow-sm space-y-2">
+                    <div class="flex justify-between items-center text-gray-500 text-xs font-semibold">
+                        <span>กำไรสุทธิ (Net Profit)</span>
+                        <i class="fa-solid fa-chart-line text-brand-500 text-base"></i>
+                    </div>
+                    <div class="text-xl font-bold text-brand-700" id="dashNetProfit">฿0.00</div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-pink-100 shadow-sm space-y-2">
+                    <div class="flex justify-between items-center text-gray-500 text-xs font-semibold">
+                        <span>ยอดรอชำระ (Pending)</span>
+                        <i class="fa-solid fa-clock text-amber-500 text-base"></i>
+                    </div>
+                    <div class="text-xl font-bold text-amber-600" id="dashPendingAmount">฿0.00</div>
+                </div>
+            </div>
+
+            <!-- Recent Transactions -->
+            <div class="bg-white rounded-2xl border border-pink-100 shadow-sm p-6 space-y-4">
+                <h3 class="text-base font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-brand-600"></i> รายการเอกสารล่าสุด
                 </h3>
-                <div class="flex justify-between py-2 border-b border-dashed border-gray-200">
-                    <span class="text-gray-600">รายรับรวม (ก่อน VAT)</span>
-                    <span class="font-bold text-emerald-600" id="rptNetRevenue">฿0.00</span>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-pink-50 text-brand-700 font-bold uppercase">
+                            <tr>
+                                <th class="py-3 px-2">เลขที่</th>
+                                <th class="py-3 px-2">วันที่</th>
+                                <th class="py-3 px-2">ลูกค้า</th>
+                                <th class="py-3 px-2 text-right">ยอดรวม</th>
+                                <th class="py-3 px-2 text-center">สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashRecentDocsTable" class="divide-y divide-pink-50">
+                            <!-- Dynamic Render -->
+                        </tbody>
+                    </table>
                 </div>
-                <div class="flex justify-between py-2 border-b border-dashed border-gray-200">
-                    <span class="text-gray-600">รายจ่ายรวม</span>
-                    <span class="font-bold text-rose-600" id="rptNetExpenses">฿0.00</span>
-                </div>
-                <div class="flex justify-between py-2 text-lg font-bold">
-                    <span class="text-gray-800">กำไรสุทธิ</span>
-                    <span class="text-brand-700" id="rptProfit">฿0.00</span>
+            </div>
+        </section>
+
+        <!-- Tab 2: Documents -->
+        <section id="tab-documents" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h1 class="text-2xl font-bold text-gray-800">เอกสารการขาย</h1>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                    <div class="relative flex-1 sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" id="searchDocumentsInput" oninput="renderDocumentsTable()" placeholder="ค้นหาเอกสาร, ลูกค้า..." class="w-full pl-9 pr-3 py-2 bg-white border border-pink-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+                    </div>
+                    <button onclick="openNewDocModal()" class="pink-gradient hover:opacity-95 text-white px-5 py-2.5 rounded-xl font-bold shadow flex items-center justify-center gap-2 transition">
+                        <i class="fa-solid fa-plus"></i> ออกเอกสารใหม่
+                    </button>
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-2xl border border-pink-100 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-brand-700 border-b border-pink-100 pb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-percent"></i> สรุปภาษีขาย (Sales Tax VAT 7%)
+            <div class="bg-white rounded-2xl border border-pink-100 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-pink-50 text-xs font-bold text-brand-700 uppercase">
+                            <tr>
+                                <th class="p-4">ประเภท</th>
+                                <th class="p-4">เลขที่เอกสาร</th>
+                                <th class="p-4">วันที่</th>
+                                <th class="p-4">ลูกค้า</th>
+                                <th class="p-4 text-right">ยอดรวม (รวม VAT)</th>
+                                <th class="p-4 text-center">สถานะ</th>
+                                <th class="p-4 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="documentsTable" class="divide-y divide-pink-50 text-sm">
+                            <!-- Dynamic Render -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 3: Expenses -->
+        <section id="tab-expenses" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h1 class="text-2xl font-bold text-gray-800">บันทึกรายจ่าย</h1>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                    <div class="relative flex-1 sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" id="searchExpensesInput" oninput="renderExpensesTable()" placeholder="ค้นหารายจ่าย, ผู้ขาย..." class="w-full pl-9 pr-3 py-2 bg-white border border-pink-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+                    </div>
+                    <button onclick="openNewExpenseModal()" class="pink-gradient hover:opacity-95 text-white px-5 py-2.5 rounded-xl font-bold shadow flex items-center justify-center gap-2 transition">
+                        <i class="fa-solid fa-plus"></i> บันทึกรายจ่ายใหม่
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-pink-100 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-pink-50 text-xs font-bold text-brand-700 uppercase">
+                            <tr>
+                                <th class="p-4">วันที่</th>
+                                <th class="p-4">หมวดหมู่</th>
+                                <th class="p-4">รายละเอียด</th>
+                                <th class="p-4">ผู้ให้บริการ / ผู้ขาย</th>
+                                <th class="p-4 text-right">จำนวนเงิน (ก่อน VAT)</th>
+                                <th class="p-4 text-right">ภาษี VAT (7%)</th>
+                                <th class="p-4 text-right">หัก ณ ที่จ่าย (WHT)</th>
+                                <th class="p-4 text-right">ยอดชำระสุทธิ</th>
+                                <th class="p-4 text-center">หลักฐาน</th>
+                                <th class="p-4 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expensesTable" class="divide-y divide-pink-50 text-sm">
+                            <!-- Dynamic Render -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 4: Products -->
+        <section id="tab-products" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h1 class="text-2xl font-bold text-gray-800">สินค้าและบริการ</h1>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                    <div class="relative flex-1 sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" id="searchProductsInput" oninput="renderProductsTable()" placeholder="ค้นหารหัส หรือชื่อสินค้า..." class="w-full pl-9 pr-3 py-2 bg-white border border-pink-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+                    </div>
+                    <button onclick="openProductModal()" class="pink-gradient hover:opacity-95 text-white px-5 py-2.5 rounded-xl font-bold shadow flex items-center justify-center gap-2 transition">
+                        <i class="fa-solid fa-plus"></i> เพิ่มสินค้าใหม่
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-pink-100 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-pink-50 text-xs font-bold text-brand-700 uppercase">
+                            <tr>
+                                <th class="p-4">รหัสสินค้า</th>
+                                <th class="p-4">ชื่อสินค้า / รายการ</th>
+                                <th class="p-4 text-right">ต้นทุน (บาท)</th>
+                                <th class="p-4 text-right">ราคาขาย (บาท)</th>
+                                <th class="p-4 text-center">คงเหลือในสต็อก</th>
+                                <th class="p-4 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="productsTable" class="divide-y divide-pink-50 text-sm">
+                            <!-- Dynamic Render -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 5: Contacts -->
+        <section id="tab-contacts" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h1 class="text-2xl font-bold text-gray-800">ผู้ติดต่อ (ลูกค้า / ผู้ขาย)</h1>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                    <div class="relative flex-1 sm:w-64">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+                        <input type="text" id="searchContactsInput" oninput="renderContactsTable()" placeholder="ค้นชื่อ, เลขภาษี, เบอร์โทร..." class="w-full pl-9 pr-3 py-2 bg-white border border-pink-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 shadow-sm">
+                    </div>
+                    <button onclick="openContactModal()" class="pink-gradient hover:opacity-95 text-white px-5 py-2.5 rounded-xl font-bold shadow flex items-center justify-center gap-2 transition">
+                        <i class="fa-solid fa-plus"></i> เพิ่มผู้ติดต่อ
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-pink-100 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left">
+                        <thead class="bg-pink-50 text-xs font-bold text-brand-700 uppercase">
+                            <tr>
+                                <th class="p-4">ชื่อบริษัท / ผู้ติดต่อ</th>
+                                <th class="p-4">เลขประจำตัวผู้เสียภาษี</th>
+                                <th class="p-4">ที่อยู่</th>
+                                <th class="p-4">เบอร์โทรศัพท์</th>
+                                <th class="p-4">อีเมล</th>
+                                <th class="p-4 text-center">ประเภท</th>
+                                <th class="p-4 text-center">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="contactsTable" class="divide-y divide-pink-50 text-sm">
+                            <!-- Dynamic Render -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tab 6: Reports -->
+        <section id="tab-reports" class="hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <h1 class="text-2xl font-bold text-gray-800">รายงานบัญชีและการเงิน</h1>
+                <div class="flex items-center space-x-2 bg-white p-2 rounded-xl border border-pink-200 shadow-sm">
+                    <span class="text-xs font-bold text-brand-700 pl-2"><i class="fa-solid fa-filter"></i> เลือกระยะเวลา:</span>
+                    <select id="reportMonth" onchange="renderReports()" class="bg-pink-50 border border-pink-200 text-sm font-semibold text-gray-700 rounded-lg p-1.5 focus:outline-none focus:border-brand-500">
+                        <option value="0">มกราคม</option>
+                        <option value="1">กุมภาพันธ์</option>
+                        <option value="2">มีนาคม</option>
+                        <option value="3">เมษายน</option>
+                        <option value="4">พฤษภาคม</option>
+                        <option value="5">มิถุนายน</option>
+                        <option value="6">กรกฎาคม</option>
+                        <option value="7">สิงหาคม</option>
+                        <option value="8">กันยายน</option>
+                        <option value="9">ตุลาคม</option>
+                        <option value="10" selected>พฤศจิกายน</option>
+                        <option value="11">ธันวาคม</option>
+                    </select>
+                    <select id="reportYear" onchange="renderReports()" class="bg-pink-50 border border-pink-200 text-sm font-semibold text-gray-700 rounded-lg p-1.5 focus:outline-none focus:border-brand-500">
+                        <option value="2025">2025</option>
+                        <option value="2026" selected>2026</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl border border-pink-100 shadow-sm space-y-4">
+                    <h3 class="text-lg font-bold text-brand-700 border-b border-pink-100 pb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-file-invoice"></i> สรุปกำไร-ขาดทุน ประจำเดือน
+                    </h3>
+                    <div class="flex justify-between py-2 border-b border-dashed border-gray-200">
+                        <span class="text-gray-600">รายรับรวม (ก่อน VAT)</span>
+                        <span class="font-bold text-emerald-600" id="rptNetRevenue">฿0.00</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-dashed border-gray-200">
+                        <span class="text-gray-600">รายจ่ายรวม</span>
+                        <span class="font-bold text-rose-600" id="rptNetExpenses">฿0.00</span>
+                    </div>
+                    <div class="flex justify-between py-2 text-lg font-bold">
+                        <span class="text-gray-800">กำไรสุทธิ</span>
+                        <span class="text-brand-700" id="rptProfit">฿0.00</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-pink-100 shadow-sm space-y-4">
+                    <h3 class="text-lg font-bold text-brand-700 border-b border-pink-100 pb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-percent"></i> สรุปภาษีขาย (Sales Tax VAT 7%)
+                    </h3>
+                    <div class="flex justify-between py-2 border-b border-dashed border-gray-200">
+                        <span class="text-gray-600">มูลค่าสินค้า/บริการ</span>
+                        <span class="font-medium text-gray-800" id="rptVatBase">฿0.00</span>
+                    </div>
+                    <div class="flex justify-between py-2 text-lg font-bold text-brand-700">
+                        <span>ภาษีมูลค่าเพิ่ม VAT 7%</span>
+                        <span id="rptVatAmount">฿0.00</span>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl border border-pink-100 shadow-sm space-y-4">
+                    <h3 class="text-lg font-bold text-amber-700 border-b border-pink-100 pb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-hand-holding-dollar"></i> สรุปภาษีหัก ณ ที่จ่าย (WHT)
+                    </h3>
+                    <div class="flex justify-between py-2 border-b border-dashed border-gray-200 text-xs">
+                        <span class="text-gray-600">หัก ณ ที่จ่าย 3% (บริการ / ค่าจ้าง)</span>
+                        <span class="font-bold text-amber-600" id="rptWht3">฿0.00</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-dashed border-gray-200 text-xs">
+                        <span class="text-gray-600">หัก ณ ที่จ่าย 5% (ค่าเช่า)</span>
+                        <span class="font-bold text-amber-600" id="rptWht5">฿0.00</span>
+                    </div>
+                    <div class="flex justify-between py-2 text-base font-bold text-amber-800 border-t border-amber-100 pt-2">
+                        <span>รวมภาษี WHT ต้องนำส่ง</span>
+                        <span id="rptTotalWht">฿0.00</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modals -->
+
+    <!-- Document Modal -->
+    <div id="docModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-brand-700 flex items-center gap-2">
+                    <i class="fa-solid fa-file-invoice"></i> ออกเอกสารใหม่
                 </h3>
-                <div class="flex justify-between py-2 border-b border-dashed border-gray-200">
-                    <span class="text-gray-600">มูลค่าสินค้า/บริการ</span>
-                    <span class="font-medium text-gray-800" id="rptVatBase">฿0.00</span>
-                </div>
-                <div class="flex justify-between py-2 text-lg font-bold text-brand-700">
-                    <span>ภาษีมูลค่าเพิ่ม VAT 7%</span>
-                    <span id="rptVatAmount">฿0.00</span>
-                </div>
+                <button onclick="closeDocModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
+            <form id="docForm" onsubmit="saveDocument(event)" class="space-y-4 text-xs">
+                <!-- Row 1: Document Type & ID -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">ประเภทเอกสาร</label>
+                        <select id="docType" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                            <option value="ใบแจ้งหนี้ (Invoice)">ใบแจ้งหนี้ (Invoice)</option>
+                            <option value="ใบเสร็จรับเงิน (Receipt)">ใบเสร็จรับเงิน (Receipt)</option>
+                            <option value="ใบกำกับภาษี (Tax Invoice)">ใบกำกับภาษี (Tax Invoice)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">เลขที่เอกสาร</label>
+                        <input type="text" id="docId" required class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                    </div>
+                </div>
 
-            <!-- WHT Withholding Tax Summary -->
-            <div class="bg-white p-6 rounded-2xl border border-pink-100 shadow-sm space-y-4">
-                <h3 class="text-lg font-bold text-amber-700 border-b border-pink-100 pb-2 flex items-center gap-2">
-                    <i class="fa-solid fa-hand-holding-dollar"></i> สรุปภาษีหัก ณ ที่จ่าย (WHT)
-                </h3>
-                <div class="flex justify-between py-2 border-b border-dashed border-gray-200 text-xs">
-                    <span class="text-gray-600">หัก ณ ที่จ่าย 3% (บริการ / ค่าจ้าง)</span>
-                    <span class="font-bold text-amber-600" id="rptWht3">฿0.00</span>
+                <!-- Row 2: Issuer & Customer -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="font-bold text-gray-700">เลือกผู้ขาย / ผู้ออกเอกสาร</label>
+                            <button type="button" onclick="openContactModal()" class="text-brand-600 hover:underline font-bold flex items-center gap-1 text-[11px]">
+                                <i class="fa-solid fa-user-plus"></i> เพิ่มผู้ขายใหม่
+                            </button>
+                        </div>
+                        <select id="docIssuerSelect" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                            <option value="">-- เลือกผู้ออกเอกสาร --</option>
+                        </select>
+                        <div class="mt-1 flex items-center gap-2">
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-pink-50 text-brand-700 font-semibold text-[11px]">
+                                <i class="fa-solid fa-circle-exclamation text-rose-500"></i> ลายเซ็น/ตรายาง:
+                            </span>
+                            <span class="text-amber-600 font-medium text-[11px]">⚠️ ยังไม่ได้ลงทะเบียนลายเซ็น/ตรายาง</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-1">
+                            <label class="font-bold text-gray-700">เลือกชื่อลูกค้า</label>
+                            <button type="button" onclick="openContactModal()" class="text-brand-600 hover:underline font-bold flex items-center gap-1 text-[11px]">
+                                <i class="fa-solid fa-user-plus"></i> เพิ่มลูกค้าใหม่
+                            </button>
+                        </div>
+                        <select id="docCustomerSelect" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                            <option value="">-- เลือกข้อมูลลูกค้า --</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="flex justify-between py-2 border-b border-dashed border-gray-200 text-xs">
-                    <span class="text-gray-600">หัก ณ ที่จ่าย 5% (ค่าเช่า)</span>
-                    <span class="font-bold text-amber-600" id="rptWht5">฿0.00</span>
-                </div>
-                <div class="flex justify-between py-2 text-base font-bold text-amber-800 border-t border-amber-100 pt-2">
-                    <span>รวมภาษี WHT ต้องนำส่ง</span>
-                    <span id="rptTotalWht">฿0.00</span>
-                </div>
-            </div>
-        </div>
-    </section>
 
-</div>
-
-
-        <div>
-            <label class="block text-xs font-bold text-gray-700 mb-1">เลขที่เอกสาร</label>
-            <input type="text" id="docId" required class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
-        </div>
-        <div>
-            <label class="block text-xs font-bold text-gray-700 mb-1">วันที่</label>
-            <input type="date" id="docDate" required class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
-        </div>
-        <!-- Customer Selection / Dropdown from Contacts -->
-        <div>
-            <label class="block text-xs font-bold text-gray-700 mb-1">เลือกชื่อลูกค้า</label>
-            <select id="docCustomerSelect" onchange="handleDocCustomerSelectChange()" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-pink-50/50">
-                <!-- Render dynamically -->
-            </select>
-        </div>
-        <!-- Hidden inputs for New Customer creation -->
-        <div id="newCustomerFields" class="hidden bg-pink-50/70 p-3 rounded-xl border border-pink-200 space-y-2">
-            <span class="text-xs font-bold text-brand-700 flex items-center gap-1"><i class="fa-solid fa-user-plus"></i> สร้างข้อมูลลูกค้าใหม่เข้าคลังผู้ติดต่อ</span>
-            <div>
-                <label class="block text-[11px] font-bold text-gray-600 mb-1">ชื่อบริษัท / ลูกค้า</label>
-                <input type="text" id="newCustName" placeholder="ระบุชื่อบริษัทหรือชื่อลูกค้า" class="w-full px-2.5 py-1.5 border border-pink-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-500">
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <label class="block text-[11px] font-bold text-gray-600 mb-1">เลขผู้เสียภาษี</label>
-                    <input type="text" id="newCustTaxId" placeholder="13 หลัก" class="w-full px-2.5 py-1.5 border border-pink-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-500">
+                <!-- Row 3: Date & Status -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">วันที่</label>
+                        <input type="date" id="docDate" required class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">สถานะ</label>
+                        <select id="docStatus" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                            <option value="Paid">ชำระแล้ว</option>
+                            <option value="Pending">รอชำระ</option>
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-gray-600 mb-1">เบอร์โทร</label>
-                    <input type="text" id="newCustPhone" placeholder="02-xxx-xxxx" class="w-full px-2.5 py-1.5 border border-pink-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-500">
-                </div>
-            </div>
-            <div>
-                <label class="block text-[11px] font-bold text-gray-600 mb-1">ที่อยู่ลูกค้า</label>
-                <textarea id="newCustAddress" rows="1.5" placeholder="ระบุที่อยู่" class="w-full px-2.5 py-1.5 border border-pink-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-500"></textarea>
-            </div>
-            <div>
-                <label class="block text-[11px] font-bold text-gray-600 mb-1">อีเมล</label>
-                <input type="email" id="newCustEmail" placeholder="customer@email.com" class="w-full px-2.5 py-1.5 border border-pink-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-500">
-            </div>
-        </div>
-        <!-- Product Selection / Dropdown from Inventory -->
-        <div>
-            <label class="block text-xs font-bold text-gray-700 mb-1">เลือกรายการสินค้าจากคลัง</label>
-            <select id="docProductSelect" onchange="handleDocProductSelectChange()" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-pink-50/50">
-                <!-- Render dynamically -->
-            </select>
-        </div>
-        <!-- Hidden inputs for New Product creation -->
-        <div id="newProductFields" class="hidden bg-pink-50/70 p-3 rounded-xl border border-pink-200 space-y-2">
-            <span class="text-xs font-bold text-brand-700 flex items-center gap-1"><i class="fa-solid fa-plus-circle"></i> สร้างรายการสินค้าใหม่เข้าคลัง</span>
-            <div class="grid grid-cols-2 gap-2">
-                <div>
-                    <label class="block text-[11px] font-bold text-gray-600 mb-1">รหัสสินค้าใหม่</label>
-                    <input type="text" id="newProdCode" placeholder="เช่น P003" class="w-full px-2.5 py-1.5 border border-pink-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-500">
-                </div>
-                <div>
-                    <label class="block text-[11px] font-bold text-gray-600 mb-1">ชื่อสินค้าใหม่</label>
-                    <input type="text" id="newProdName" placeholder="ระบุชื่อสินค้าใหม่" class="w-full px-2.5 py-1.5 border border-pink-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-500">
-                </div>
-            </div>
-        </div>
 
-        <div class="grid grid-cols-2 gap-2">
-            <div>
-                <label class="block text-xs font-bold text-gray-700 mb-1">ราคาก่อน VAT (บาท)</label>
-                <input type="number" step="0.01" id="docSubtotal" oninput="calculateDocTotals()" required placeholder="0.00" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
-            </div>
-            <div>
-                <label class="block text-xs font-bold text-gray-700 mb-1">ส่วนลด (บาท)</label>
-                <input type="number" step="0.01" id="docDiscount" oninput="calculateDocTotals()" placeholder="0.00" value="0" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
-            </div>
-        </div>
-        <div class="bg-pink-50 p-3 rounded-xl border border-pink-100 space-y-1.5 text-xs">
-            <div class="flex justify-between text-gray-600">
-                <span>มูลค่าหลังหักส่วนลด:</span>
-                <span id="docNetPriceText" class="font-semibold text-gray-800">฿0.00</span>
-            </div>
-            <div class="flex justify-between text-gray-600">
-                <span>ภาษีมูลค่าเพิ่ม (VAT 7%):</span>
-                <span id="docVatText" class="font-semibold text-gray-800">฿0.00</span>
-            </div>
-            <div class="flex justify-between text-sm font-bold text-brand-700 border-t border-pink-200 pt-1">
-                <span>ยอดรวมสุทธิ (รวม VAT):</span>
-                <span id="docTotalText">฿0.00</span>
-            </div>
-        </div>
-        <div>
-            <label class="block text-xs font-bold text-gray-700 mb-1">สถานะ</label>
-            <select id="docStatus" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
-                <option value="Paid">ชำระแล้ว</option>
-                <option value="Pending">รอชำระ</option>
-            </select>
-        </div>
-        <div class="flex justify-end gap-2 pt-2">
-            <button type="button" onclick="closeDocModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-100">ยกเลิก</button>
-            <button type="submit" class="px-5 py-2 pink-gradient text-white rounded-xl text-sm font-bold shadow hover:opacity-95">บันทึก</button>
-        </div>
-    </form>
-</div>
+                <!-- Section: Items Table -->
+                <div class="space-y-2 pt-2 border-t border-gray-100">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-brand-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-box"></i> รายการสินค้า / บริการในเอกสาร
+                        </span>
+                        <div class="flex gap-2">
+                            <button type="button" onclick="openProductModal()" class="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg text-[11px] hover:bg-emerald-100 transition flex items-center gap-1">
+                                <i class="fa-solid fa-circle-plus"></i> สร้างสินค้าใหม่
+                            </button>
+                            <button type="button" onclick="addDocItemRow()" class="px-2.5 py-1 bg-pink-50 text-brand-700 font-bold rounded-lg text-[11px] hover:bg-pink-100 transition flex items-center gap-1">
+                                <i class="fa-solid fa-plus"></i> เพิ่มรายการสินค้า
+                            </button>
+                        </div>
+                    </div>
 
-
-    <!-- Printable Area -->
-    <div id="printableInvoice" class="p-6 bg-white text-gray-800 space-y-6 border border-gray-200 rounded-xl">
-        <!-- Header -->
-        <div class="flex justify-between items-start border-b border-gray-200 pb-4">
-            <div>
-                <h2 class="text-xl font-bold text-gray-900" id="printCompanyTitle">บริษัท ทีเคพี จำกัด</h2>
-                <p class="text-xs text-gray-500 mt-1" id="printCompanyAddress">123/45 ถนนสุขุมวิท แขวงคลองเตย เขตคลองเตย กรุงเทพมหานคร 10110</p>
-                <p class="text-xs text-gray-500">เลขประจำตัวผู้เสียภาษี: <span id="printCompanyTaxId">0105559998881</span></p>
-                <p class="text-xs text-gray-500">โทรศัพท์: <span id="printCompanyPhone">02-999-8888</span> | อีเมล: <span id="printCompanyEmail">account@tkp7.com</span></p>
-            </div>
-            <div class="text-right">
-                <span id="printDocTypeName" class="text-lg font-bold text-brand-700 block uppercase">ใบแจ้งหนี้ / INVOICE</span>
-                <p class="text-xs text-gray-600 font-semibold mt-1">เลขที่: <span id="printDocId" class="font-bold text-gray-900"></span></p>
-                <p class="text-xs text-gray-500">วันที่: <span id="printDocDate"></span></p>
-            </div>
-        </div>
-
-        <!-- Customer Details -->
-        <div class="bg-gray-50 p-4 rounded-xl border border-gray-100 grid grid-cols-2 gap-4 text-xs">
-            <div>
-                <span class="font-bold text-gray-700 block mb-1">ข้อมูลลูกค้า (Customer):</span>
-                <p class="font-semibold text-gray-900 text-sm" id="printCustomerName"></p>
-                <p class="text-gray-500 mt-1">เลขประจำตัวผู้เสียภาษี: <span id="printCustomerTaxId" class="font-medium text-gray-700"></span></p>
-                <p class="text-gray-500">ที่อยู่: <span id="printCustomerAddress" class="font-medium text-gray-700"></span></p>
-                <p class="text-gray-500">เบอร์โทรศัพท์: <span id="printCustomerPhone" class="font-medium text-gray-700"></span></p>
-            </div>
-            <div>
-                <span class="font-bold text-gray-700 block mb-1">เงื่อนไขและการชำระเงิน:</span>
-                <p class="text-gray-600">กำหนดชำระ: <span>ภายใน 30 วัน</span></p>
-                <p class="text-gray-600">สถานะ: <span id="printDocStatusBadge" class="font-bold"></span></p>
-            </div>
-        </div>
-
-        <!-- Product Table -->
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs border-collapse">
-                <thead>
-                    <tr class="bg-gray-100 font-bold text-gray-700 border-b border-gray-200">
-                        <th class="p-2.5 text-center w-12">ลำดับ</th>
-                        <th class="p-2.5 w-24">รหัสสินค้า</th>
-                        <th class="p-2.5">รายการ / รายละเอียด</th>
-                        <th class="p-2.5 text-right w-16">จำนวน</th>
-                        <th class="p-2.5 text-right w-24">ราคา/หน่วย</th>
-                        <th class="p-2.5 text-right w-28">จำนวนเงิน (บาท)</th>
-                    </tr>
-                </thead>
-                <tbody id="printDocItemsBody" class="divide-y divide-gray-100">
-                    <!-- Items will be populated dynamically -->
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Totals Section -->
-        <div class="flex justify-end pt-2 text-xs">
-            <div class="w-64 space-y-1.5 border-t border-gray-200 pt-3">
-                <div class="flex justify-between text-gray-600">
-                    <span>ราคาก่อน VAT:</span>
-                    <span id="printRawSubTotal">฿0.00</span>
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-2 overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="text-gray-500 font-bold border-b border-gray-200 pb-2">
+                                    <th class="p-2 w-36">รหัสสินค้า</th>
+                                    <th class="p-2">ชื่อสินค้า / รายละเอียด</th>
+                                    <th class="p-2 w-20 text-center">จำนวน</th>
+                                    <th class="p-2 w-28 text-right">ราคา/หน่วย</th>
+                                    <th class="p-2 w-28 text-right">รวม (บาท)</th>
+                                    <th class="p-2 w-12 text-center">ลบ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="docItemsTableBody" class="divide-y divide-gray-200">
+                                <!-- Dynamic Item Rows -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-                <div class="flex justify-between text-gray-600">
-                    <span>ส่วนลด:</span>
-                    <span class="text-rose-600" id="printDiscountTotal">฿0.00</span>
-                </div>
-                <div class="flex justify-between text-gray-600">
-                    <span>มูลค่าสินค้า/บริการ (Net Amount):</span>
-                    <span id="printSubTotal">฿0.00</span>
-                </div>
-                <div class="flex justify-between text-gray-600">
-                    <span>ภาษีมูลค่าเพิ่ม VAT 7%:</span>
-                    <span id="printVatTotal">฿0.00</span>
-                </div>
-                <div class="flex justify-between font-bold text-sm text-brand-700 border-t border-gray-200 pt-2">
-                    <span>จำนวนเงินรวมทั้งสิ้น (Grand Total):</span>
-                    <span id="printGrandTotal">฿0.00</span>
-                </div>
-            </div>
-        </div>
 
-        <!-- Signatures -->
-        <div class="grid grid-cols-2 gap-8 pt-8 text-center text-xs text-gray-600">
-            <div class="space-y-8">
-                <p>ในนาม ____________________________________<br>(ลูกค้า / ผู้รับสินค้า)</p>
-                <p>วันที่ ______ / ______ / _________</p>
-            </div>
-            <div class="space-y-8">
-                <p>ในนาม **บริษัท ทีเคพี จำกัด**<br>(ผู้รับเงิน / ผู้ออกเอกสาร)</p>
-                <p>วันที่ ______ / ______ / _________</p>
-            </div>
+                <!-- Row 4: Tax Type & Discount -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">รูปแบบการชำระเงิน / ภาษี</label>
+                        <select id="docTaxType" onchange="calculateDocTotals()" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                            <option value="vat7">ภาษี VAT 7%</option>
+                            <option value="none">ชำระเงินสด / ไม่มี VAT</option>
+                            <option value="vat7_wht3">ภาษี VAT 7% + หัก ณ ที่จ่าย 3% (บริการ)</option>
+                            <option value="vat7_wht5">ภาษี VAT 7% + หัก ณ ที่จ่าย 5% (ค่าเช่า)</option>
+                            <option value="wht3">หัก ณ ที่จ่าย 3% (ค่าจ้าง) ไม่รวม VAT</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">ส่วนลดท้ายบิล (บาท)</label>
+                        <input type="number" step="0.01" id="docDiscount" oninput="calculateDocTotals()" placeholder="0" value="0" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                    </div>
+                </div>
+
+                <!-- Calculation Summary Box -->
+                <div class="bg-pink-50/70 p-4 rounded-xl border border-pink-100 space-y-1.5 text-xs">
+                    <div class="flex justify-between text-gray-600">
+                        <span>ราคารวมสินค้า (Subtotal):</span>
+                        <span id="docSubtotalText" class="font-semibold text-gray-800">฿0.00</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>ส่วนลด (Discount):</span>
+                        <span id="docDiscountText" class="font-semibold text-rose-600">-฿0.00</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>ภาษีมูลค่าเพิ่ม (VAT 7%):</span>
+                        <span id="docVatText" class="font-semibold text-gray-800">฿0.00</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>หัก ณ ที่จ่าย (WHT):</span>
+                        <span id="docWhtText" class="font-semibold text-rose-600">-฿0.00</span>
+                    </div>
+                    <div class="flex justify-between text-base font-bold text-brand-700 border-t border-pink-200 pt-2">
+                        <span>ยอดชำระสุทธิ (Grand Total):</span>
+                        <span id="docTotalText">฿0.00</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                    <button type="button" onclick="closeDocModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-xs font-semibold hover:bg-gray-100">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 pink-gradient text-white rounded-xl text-xs font-bold shadow hover:opacity-95">บันทึกเอกสาร</button>
+                </div>
+            </form>
         </div>
     </div>
-</div>
+
+    <!-- Expense Modal -->
+    <div id="expenseModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-brand-700 flex items-center gap-2">
+                    <i class="fa-solid fa-receipt"></i> บันทึกรายจ่ายใหม่
+                </h3>
+                <button onclick="closeExpenseModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="expenseForm" onsubmit="saveExpense(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">วันที่</label>
+                    <input type="date" id="expDate" required class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 bg-white">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">หมวดหมู่</label>
+                    <select id="expCategory" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                        <option value="ค่าเช่าสถานที่">ค่าเช่าสถานที่</option>
+                        <option value="ค่าใช้จ่ายสำนักงาน">ค่าใช้จ่ายสำนักงาน</option>
+                        <option value="ค่าสาธารณูปโภค (ค่าน้ำ/ค่าไฟ)">ค่าสาธารณูปโภค (ค่าน้ำ/ค่าไฟ)</option>
+                        <option value="ค่าบริการทางวิชาชีพ / ค่าจ้างทำของ">ค่าบริการทางวิชาชีพ / ค่าจ้างทำของ</option>
+                        <option value="ค่าโฆษณาและการตลาด">ค่าโฆษณาและการตลาด</option>
+                        <option value="อื่นๆ">อื่นๆ</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">รายละเอียด</label>
+                    <input type="text" id="expDesc" placeholder="ระบุรายละเอียดรายจ่าย" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="font-bold text-gray-700">ผู้ขาย / ผู้รับเงิน</label>
+                        <button type="button" onclick="openContactModal()" class="text-brand-600 hover:underline font-bold flex items-center gap-1 text-[11px]">
+                            <i class="fa-solid fa-user-plus"></i> เพิ่มผู้ขายใหม่
+                        </button>
+                    </div>
+                    <select id="expVendorSelect" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                        <option value="">-- ไม่ระบุผู้ขาย / ผู้รับเงิน --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">จำนวนเงิน (บาท)</label>
+                    <input type="number" step="0.01" id="expAmount" oninput="calculateExpenseTotals()" required placeholder="0.00" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 font-bold">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">รูปแบบการชำระเงิน / ภาษี</label>
+                    <select id="expTaxType" onchange="calculateExpenseTotals()" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                        <option value="none">ชำระเงินสด (ไม่มี VAT)</option>
+                        <option value="vat7">รวม VAT 7%</option>
+                        <option value="wht3">หัก ณ ที่จ่าย 3% (บริการ / ค่าจ้าง)</option>
+                        <option value="wht5">หัก ณ ที่จ่าย 5% (ค่าเช่า)</option>
+                    </select>
+                </div>
+                <div class="bg-pink-50/70 p-3 rounded-xl border border-pink-100 space-y-1.5 text-xs">
+                    <div class="flex justify-between text-gray-600">
+                        <span>จำนวนเงินก่อน VAT:</span>
+                        <span id="expSubtotalText" class="font-semibold text-gray-800">฿0.00</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>จำนวนภาษี VAT (7%):</span>
+                        <span id="expVatText" class="font-semibold text-gray-800">฿0.00</span>
+                    </div>
+                    <div class="flex justify-between text-gray-600">
+                        <span>ภาษีหัก ณ ที่จ่าย (WHT):</span>
+                        <span id="expWhtText" class="font-semibold text-rose-600">-฿0.00</span>
+                    </div>
+                    <div class="flex justify-between text-sm font-bold text-brand-700 border-t border-pink-200 pt-1.5">
+                        <span>ยอดชำระสุทธิ (Net Payment):</span>
+                        <span id="expNetTotalText">฿0.00</span>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">แนบไฟล์เอกสาร (PDF หรือรูปภาพ)</label>
+                    <div class="flex items-center gap-2 border border-gray-200 rounded-xl p-1.5 bg-gray-50 text-xs">
+                        <label class="bg-white border border-gray-300 px-3 py-1.5 rounded-lg cursor-pointer font-semibold text-gray-700 hover:bg-gray-100">
+                            เลือกไฟล์ <input type="file" id="expFile" class="hidden">
+                        </label>
+                        <span class="text-gray-400 text-[11px] truncate">ไม่ได้เลือกไฟล์ใด</span>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                    <button type="button" onclick="closeExpenseModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-xs font-semibold hover:bg-gray-100">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 pink-gradient text-white rounded-xl text-xs font-bold shadow hover:opacity-95">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Product Modal -->
+    <div id="productModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fa-solid fa-box text-brand-600"></i> เพิ่มสินค้าใหม่
+                </h3>
+                <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="productForm" onsubmit="saveProduct(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">รหัสสินค้า</label>
+                    <input type="text" id="prodCode" required placeholder="เช่น P001" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">ชื่อสินค้า / รายการ</label>
+                    <input type="text" id="prodName" required placeholder="ระบุชื่อสินค้า" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">ต้นทุน (บาท)</label>
+                        <input type="number" step="0.01" id="prodCost" required placeholder="0.00" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">ราคาขาย (บาท)</label>
+                        <input type="number" step="0.01" id="prodPrice" required placeholder="0.00" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">จำนวนสต็อกเริ่มต้น</label>
+                    <input type="number" id="prodStock" required placeholder="0" value="10" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeProductModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-100">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 pink-gradient text-white rounded-xl text-sm font-bold shadow hover:opacity-95">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contact Modal (Exact Reference Match) -->
+    <div id="contactModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-brand-700 flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus"></i> เพิ่มผู้ติดต่อ
+                </h3>
+                <button onclick="closeContactModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="contactForm" onsubmit="saveContact(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">ชื่อบริษัท / ผู้ติดต่อ <span class="text-rose-500">*</span></label>
+                    <input type="text" id="contName" required placeholder="ระบุชื่อบริษัทหรือบุคคล" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">เลขประจำตัวผู้เสียภาษี (Tax ID)</label>
+                    <input type="text" id="contTaxId" placeholder="เลข 13 หลัก" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">ที่อยู่แบบเต็ม (สำหรับออกเอกสาร)</label>
+                    <textarea id="contAddress" rows="2" placeholder="ระบุที่อยู่อย่างละเอียด" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">เบอร์โทรศัพท์</label>
+                        <input type="text" id="contPhone" placeholder="02-xxx-xxxx" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-gray-700 mb-1">ประเภทผู้ติดต่อ</label>
+                        <select id="contType" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                            <option value="Customer">ลูกค้า</option>
+                            <option value="Vendor">ผู้ขาย / ผู้ให้บริการ</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold text-gray-700 mb-1">อีเมล</label>
+                    <input type="email" id="contEmail" placeholder="example@email.com" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+                </div>
+                <div class="grid grid-cols-2 gap-2 pt-1 border-t border-gray-100">
+                    <div>
+                        <label class="block font-bold text-brand-700 mb-1 flex items-center gap-1"><i class="fa-solid fa-signature"></i> ซิกเนเจอร์ / ลายเซ็น</label>
+                        <div class="flex items-center gap-1 border border-gray-200 rounded-xl p-1 bg-gray-50">
+                            <label class="bg-white border border-gray-300 px-2.5 py-1 rounded-lg cursor-pointer font-semibold text-gray-700 hover:bg-gray-100 text-[11px]">
+                                เลือกไฟล์ <input type="file" class="hidden">
+                            </label>
+                            <span class="text-gray-400 text-[10px] truncate">ไม่ได้เลือกไฟล์ใด</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-brand-700 mb-1 flex items-center gap-1"><i class="fa-solid fa-stamp"></i> รูปตราประทับ</label>
+                        <div class="flex items-center gap-1 border border-gray-200 rounded-xl p-1 bg-gray-50">
+                            <label class="bg-white border border-gray-300 px-2.5 py-1 rounded-lg cursor-pointer font-semibold text-gray-700 hover:bg-gray-100 text-[11px]">
+                                เลือกไฟล์ <input type="file" class="hidden">
+                            </label>
+                            <span class="text-gray-400 text-[10px] truncate">ไม่ได้เลือกไฟล์ใด</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                    <button type="button" onclick="closeContactModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-xs font-semibold hover:bg-gray-100">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 pink-gradient text-white rounded-xl text-xs font-bold shadow hover:opacity-95">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let appData = {
+            documents: [],
+            expenses: [],
+            products: [
+                { code: 'P001', name: 'บริการทำบัญชีและภาษีประจำเดือน', cost: 1500, price: 3000, stock: 50 },
+                { code: 'P002', name: 'ให้คำปรึกษาภาษีอากร (ชั่วโมงละ)', cost: 1000, price: 2500, stock: 100 }
+            ],
+            contacts: [
+                { name: 'บริษัท เอสบีไอ อินเตอร์เนชั่นแนล จำกัด', taxId: '0105558887771', address: '129/1 อาคารสาทรซิตี้ทาวเวอร์ กรุงเทพฯ', phone: '02-555-1234', email: 'contact@sbi.co.th', type: 'Customer' },
+                { name: 'บริษัท เอ็มแอนด์อาร์ อีออคทริค2 จำกัด', taxId: '0105559998881', address: '45/2 ถนนสุขุมวิท กรุงเทพฯ', phone: '02-888-9999', email: 'mr@electric.co.th', type: 'Vendor' },
+                { name: 'การไฟฟ้าส่วนภูมิภาค เขต2 (ภาคเหนือ)', taxId: '0994000165511', address: 'เชียงใหม่', phone: '053-111-222', email: 'pea@pea.co.th', type: 'Customer' }
+            ]
+        };
+
+        function switchTab(tabName) {
+            const tabs = ['dashboard', 'documents', 'expenses', 'products', 'contacts', 'reports'];
+            tabs.forEach(t => {
+                const section = document.getElementById('tab-' + t);
+                const navBtn = document.getElementById('nav-' + t);
+                if (section) {
+                    if (t === tabName) {
+                        section.classList.remove('hidden');
+                    } else {
+                        section.classList.add('hidden');
+                    }
+                }
+                if (navBtn) {
+                    if (t === tabName) {
+                        navBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-brand-700 bg-pink-50 shadow-sm font-semibold";
+                    } else {
+                        navBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold";
+                    }
+                }
+            });
+            if (tabName === 'reports') {
+                renderReports();
+            }
+        }
+
+        function setDashboardPeriod(period) {
+            ['month', 'quarter', 'year'].forEach(p => {
+                const btn = document.getElementById('dashPeriod' + p.charAt(0).toUpperCase() + p.slice(1));
+                if (btn) {
+                    if (p === period) {
+                        btn.className = "px-4 py-2 pink-gradient text-white rounded-lg shadow-sm font-bold transition";
+                    } else {
+                        btn.className = "px-4 py-2 hover:text-brand-700 rounded-lg text-gray-600 transition font-medium";
+                    }
+                }
+            });
+        }
+
+        // Modals Open/Close
+        function openNewDocModal() {
+            document.getElementById('docId').value = 'INV-2026-' + Math.floor(100 + Math.random() * 900);
+            document.getElementById('docDate').valueAsDate = new Date();
+            populateDocDropdowns();
+            document.getElementById('docItemsTableBody').innerHTML = '';
+            addDocItemRow();
+            document.getElementById('docModal').classList.remove('hidden');
+        }
+        function closeDocModal() { document.getElementById('docModal').classList.add('hidden'); }
+
+        function openNewExpenseModal() {
+            document.getElementById('expDate').valueAsDate = new Date();
+            populateExpenseVendors();
+            document.getElementById('expenseModal').classList.remove('hidden');
+        }
+        function closeExpenseModal() { document.getElementById('expenseModal').classList.add('hidden'); }
+
+        function openProductModal() {
+            document.getElementById('productForm').reset();
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+        function closeProductModal() { document.getElementById('productModal').classList.add('hidden'); }
+
+        function openContactModal() {
+            document.getElementById('contactForm').reset();
+            document.getElementById('contactModal').classList.remove('hidden');
+        }
+        function closeContactModal() { document.getElementById('contactModal').classList.add('hidden'); }
+
+        function populateDocDropdowns() {
+            const custSelect = document.getElementById('docCustomerSelect');
+            const customers = appData.contacts.filter(c => c.type === 'Customer');
+            custSelect.innerHTML = `<option value="">-- เลือกข้อมูลลูกค้า --</option>` +
+                customers.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
+
+            const issuerSelect = document.getElementById('docIssuerSelect');
+            const vendors = appData.contacts.filter(c => c.type === 'Vendor');
+            issuerSelect.innerHTML = `<option value="">-- เลือกผู้ออกเอกสาร --</option>` +
+                (vendors.length > 0 ? vendors.map(v => `<option value="${v.name}">${v.name}</option>`).join('') : `<option value="บริษัท ทีเคพี จำกัด">บริษัท ทีเคพี จำกัด</option>`);
+        }
+
+        function addDocItemRow() {
+            const tbody = document.getElementById('docItemsTableBody');
+            const rowIdx = tbody.children.length;
+            const tr = document.createElement('tr');
+            tr.className = "hover:bg-gray-100/50";
+            tr.innerHTML = `
+                <td class="p-2">
+                    <select onchange="handleDocItemSelect(this)" class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-500 item-code-select">
+                        <option value="">-- เลือกจากคลัง --</option>
+                        ${appData.products.map(p => `<option value="${p.code}" data-price="${p.price}" data-name="${p.name}">${p.code} - ${p.name}</option>`).join('')}
+                    </select>
+                </td>
+                <td class="p-2">
+                    <input type="text" placeholder="ชื่อสินค้าหรือรายละเอียด" class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-500 item-name-input">
+                </td>
+                <td class="p-2 text-center">
+                    <input type="number" min="1" value="1" oninput="calculateDocTotals()" class="w-16 px-2 py-1.5 border border-gray-200 rounded-lg text-xs text-center bg-white focus:outline-none focus:border-brand-500 item-qty-input">
+                </td>
+                <td class="p-2 text-right">
+                    <input type="number" step="0.01" value="0" oninput="calculateDocTotals()" class="w-24 px-2 py-1.5 border border-gray-200 rounded-lg text-xs text-right bg-white focus:outline-none focus:border-brand-500 item-price-input">
+                </td>
+                <td class="p-2 text-right font-bold item-row-total text-gray-800">฿0.00</td>
+                <td class="p-2 text-center">
+                    <button type="button" onclick="this.closest('tr').remove(); calculateDocTotals();" class="text-red-500 hover:text-red-700 font-bold"><i class="fa-solid fa-trash"></i></button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+            calculateDocTotals();
+        }
+
+        function handleDocItemSelect(selectElem) {
+            const row = selectElem.closest('tr');
+            const selectedOpt = selectElem.options[selectElem.selectedIndex];
+            const price = selectedOpt.getAttribute('data-price') || 0;
+            const name = selectedOpt.getAttribute('data-name') || '';
+
+            row.querySelector('.item-name-input').value = name;
+            row.querySelector('.item-price-input').value = price;
+            calculateDocTotals();
+        }
+
+        function calculateDocTotals() {
+            const rows = document.querySelectorAll('#docItemsTableBody tr');
+            let subtotal = 0;
+
+            rows.forEach(row => {
+                const qty = parseFloat(row.querySelector('.item-qty-input')?.value) || 0;
+                const price = parseFloat(row.querySelector('.item-price-input')?.value) || 0;
+                const rowTotal = qty * price;
+                row.querySelector('.item-row-total').innerText = '฿' + rowTotal.toFixed(2);
+                subtotal += rowTotal;
+            });
+
+            const discount = parseFloat(document.getElementById('docDiscount').value) || 0;
+            const netSubtotal = Math.max(0, subtotal - discount);
+            const taxType = document.getElementById('docTaxType').value;
+            
+            let vat = 0;
+            let wht = 0;
+            let grandTotal = netSubtotal;
+
+            if (taxType === 'vat7') {
+                vat = netSubtotal * 0.07;
+                grandTotal = netSubtotal + vat;
+            } else if (taxType === 'vat7_wht3') {
+                vat = netSubtotal * 0.07;
+                wht = netSubtotal * 0.03;
+                grandTotal = netSubtotal + vat - wht;
+            } else if (taxType === 'vat7_wht5') {
+                vat = netSubtotal * 0.07;
+                wht = netSubtotal * 0.05;
+                grandTotal = netSubtotal + vat - wht;
+            } else if (taxType === 'wht3') {
+                wht = netSubtotal * 0.03;
+                grandTotal = netSubtotal - wht;
+            }
+
+            document.getElementById('docSubtotalText').innerText = '฿' + subtotal.toFixed(2);
+            document.getElementById('docDiscountText').innerText = '-฿' + discount.toFixed(2);
+            document.getElementById('docVatText').innerText = '฿' + vat.toFixed(2);
+            document.getElementById('docWhtText').innerText = '-฿' + wht.toFixed(2);
+            document.getElementById('docTotalText').innerText = '฿' + grandTotal.toFixed(2);
+        }
+
+        function saveDocument(e) {
+            e.preventDefault();
+            const rows = document.querySelectorAll('#docItemsTableBody tr');
+            let subtotal = 0;
+            rows.forEach(row => {
+                const qty = parseFloat(row.querySelector('.item-qty-input')?.value) || 0;
+                const price = parseFloat(row.querySelector('.item-price-input')?.value) || 0;
+                subtotal += (qty * price);
+            });
+
+            const discount = parseFloat(document.getElementById('docDiscount').value) || 0;
+            const netSub = Math.max(0, subtotal - discount);
+            const taxType = document.getElementById('docTaxType').value;
+            let vat = 0;
+            let wht = 0;
+            if (taxType === 'vat7') {
+                vat = netSub * 0.07;
+            } else if (taxType === 'vat7_wht3') {
+                vat = netSub * 0.07;
+                wht = netSub * 0.03;
+            } else if (taxType === 'vat7_wht5') {
+                vat = netSub * 0.07;
+                wht = netSub * 0.05;
+            } else if (taxType === 'wht3') {
+                wht = netSub * 0.03;
+            }
+            let grandTotal = netSub + vat - wht;
+
+            const newDoc = {
+                id: document.getElementById('docId').value,
+                type: document.getElementById('docType').value,
+                date: document.getElementById('docDate').value,
+                customer: document.getElementById('docCustomerSelect').value || 'ลูกค้าทั่วไป',
+                subtotal: netSub,
+                vat: vat,
+                total: grandTotal,
+                status: document.getElementById('docStatus').value
+            };
+            appData.documents.push(newDoc);
+            closeDocModal();
+            renderDocumentsTable();
+            updateDashboard();
+        }
+
+        function populateExpenseVendors() {
+            const select = document.getElementById('expVendorSelect');
+            const vendors = appData.contacts.filter(c => c.type === 'Vendor');
+            select.innerHTML = `<option value="">-- ไม่ระบุผู้ขาย / ผู้รับเงิน --</option>` +
+                vendors.map(v => `<option value="${v.name}">${v.name}</option>`).join('');
+        }
+
+        function calculateExpenseTotals() {
+            const amount = parseFloat(document.getElementById('expAmount').value) || 0;
+            const taxType = document.getElementById('expTaxType').value;
+            let subtotal = amount;
+            let vat = 0;
+            let wht = 0;
+            let netTotal = amount;
+
+            if (taxType === 'vat7') {
+                subtotal = amount / 1.07;
+                vat = amount - subtotal;
+                netTotal = amount;
+            } else if (taxType === 'wht3') {
+                wht = amount * 0.03;
+                netTotal = amount - wht;
+            } else if (taxType === 'wht5') {
+                wht = amount * 0.05;
+                netTotal = amount - wht;
+            }
+
+            document.getElementById('expSubtotalText').innerText = '฿' + subtotal.toFixed(2);
+            document.getElementById('expVatText').innerText = '฿' + vat.toFixed(2);
+            document.getElementById('expWhtText').innerText = '-฿' + wht.toFixed(2);
+            document.getElementById('expNetTotalText').innerText = '฿' + netTotal.toFixed(2);
+        }
+
+        function saveExpense(e) {
+            e.preventDefault();
+            const amount = parseFloat(document.getElementById('expAmount').value) || 0;
+            const taxType = document.getElementById('expTaxType').value;
+            let netTotal = amount;
+            if (taxType === 'wht3') netTotal = amount - (amount * 0.03);
+            if (taxType === 'wht5') netTotal = amount - (amount * 0.05);
+
+            const newExp = {
+                date: document.getElementById('expDate').value,
+                category: document.getElementById('expCategory').value,
+                description: document.getElementById('expDesc').value,
+                vendor: document.getElementById('expVendorSelect').value || '-',
+                amount: netTotal
+            };
+            appData.expenses.push(newExp);
+            closeExpenseModal();
+            renderExpensesTable();
+            updateDashboard();
+        }
+
+        function saveProduct(e) {
+            e.preventDefault();
+            const newProd = {
+                code: document.getElementById('prodCode').value,
+                name: document.getElementById('prodName').value,
+                cost: parseFloat(document.getElementById('prodCost').value) || 0,
+                price: parseFloat(document.getElementById('prodPrice').value) || 0,
+                stock: parseInt(document.getElementById('prodStock').value) || 0
+            };
+            appData.products.push(newProd);
+            closeProductModal();
+            renderProductsTable();
+        }
+
+        function saveContact(e) {
+            e.preventDefault();
+            const newCont = {
+                name: document.getElementById('contName').value,
+                taxId: document.getElementById('contTaxId').value || '-',
+                address: document.getElementById('contAddress').value || '-',
+                phone: document.getElementById('contPhone').value || '-',
+                email: document.getElementById('contEmail').value || '-',
+                type: document.getElementById('contType').value
+            };
+            appData.contacts.push(newCont);
+            closeContactModal();
+            renderContactsTable();
+        }
+
+        function renderDocumentsTable() {
+            const tbody = document.getElementById('documentsTable');
+            const keyword = (document.getElementById('searchDocumentsInput')?.value || '').toLowerCase();
+            const filtered = appData.documents.filter(d => d.id.toLowerCase().includes(keyword) || d.customer.toLowerCase().includes(keyword));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-gray-400">ยังไม่มีรายการเอกสารการขาย</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = filtered.map((d, index) => `
+                <tr class="hover:bg-pink-50/50">
+                    <td class="p-4"><span class="px-2 py-1 bg-pink-50 text-brand-700 rounded-lg text-xs font-bold">ใบแจ้งหนี้</span></td>
+                    <td class="p-4 font-mono font-bold text-gray-900">${d.id}</td>
+                    <td class="p-4">${d.date}</td>
+                    <td class="p-4 font-semibold">${d.customer}</td>
+                    <td class="p-4 text-right font-bold text-gray-800">฿${d.total.toFixed(2)}</td>
+                    <td class="p-4 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${d.status === 'Paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${d.status === 'Paid' ? 'ชำระแล้ว' : 'รอชำระ'}</span></td>
+                    <td class="p-4 text-center"><button onclick="deleteDoc(${index})" class="text-red-500 hover:text-red-700 text-xs font-bold"><i class="fa-solid fa-trash"></i> ลบ</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderExpensesTable() {
+            const tbody = document.getElementById('expensesTable');
+            const keyword = (document.getElementById('searchExpensesInput')?.value || '').toLowerCase();
+            const filtered = appData.expenses.filter(e => e.category.toLowerCase().includes(keyword) || e.vendor.toLowerCase().includes(keyword));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-6 text-gray-400">ยังไม่มีรายการรายจ่าย</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = filtered.map((e, index) => `
+                <tr class="hover:bg-pink-50/50">
+                    <td class="p-4">${e.date}</td>
+                    <td class="p-4"><span class="px-2 py-1 bg-pink-50 text-brand-700 rounded-lg text-xs font-bold">${e.category}</span></td>
+                    <td class="p-4 text-gray-600">${e.description || '-'}</td>
+                    <td class="p-4 font-semibold">${e.vendor}</td>
+                    <td class="p-4 text-right font-semibold">฿${e.amount.toFixed(2)}</td>
+                    <td class="p-4 text-right">฿0.00</td>
+                    <td class="p-4 text-right text-amber-600">฿0.00</td>
+                    <td class="p-4 text-right font-bold text-rose-600">฿${e.amount.toFixed(2)}</td>
+                    <td class="p-4 text-center"><span class="text-xs text-gray-400">ไม่มีไฟล์</span></td>
+                    <td class="p-4 text-center"><button onclick="deleteExpense(${index})" class="text-red-500 hover:text-red-700 text-xs font-bold"><i class="fa-solid fa-trash"></i> ลบ</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderProductsTable() {
+            const tbody = document.getElementById('productsTable');
+            const keyword = (document.getElementById('searchProductsInput')?.value || '').toLowerCase();
+            const filtered = appData.products.filter(p => p.code.toLowerCase().includes(keyword) || p.name.toLowerCase().includes(keyword));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-400">ยังไม่มีสินค้าในคลัง</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = filtered.map((p, index) => `
+                <tr class="hover:bg-pink-50/50">
+                    <td class="p-4 font-mono font-bold text-gray-900">${p.code}</td>
+                    <td class="p-4 font-semibold">${p.name}</td>
+                    <td class="p-4 text-right text-gray-600">฿${p.cost.toFixed(2)}</td>
+                    <td class="p-4 text-right font-bold text-brand-700">฿${p.price.toFixed(2)}</td>
+                    <td class="p-4 text-center font-bold text-emerald-600">${p.stock}</td>
+                    <td class="p-4 text-center"><button onclick="deleteProduct(${index})" class="text-red-500 hover:text-red-700 text-xs font-bold"><i class="fa-solid fa-trash"></i> ลบ</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderContactsTable() {
+            const tbody = document.getElementById('contactsTable');
+            const keyword = (document.getElementById('searchContactsInput')?.value || '').toLowerCase();
+            const filtered = appData.contacts.filter(c => c.name.toLowerCase().includes(keyword) || c.phone.toLowerCase().includes(keyword));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-gray-400">ยังไม่มีผู้ติดต่อในระบบ</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = filtered.map((c, index) => `
+                <tr class="hover:bg-pink-50/50">
+                    <td class="p-4 font-bold text-gray-900">${c.name}</td>
+                    <td class="p-4 font-mono text-xs">${c.taxId}</td>
+                    <td class="p-4 text-gray-600 truncate max-w-xs">${c.address}</td>
+                    <td class="p-4">${c.phone}</td>
+                    <td class="p-4">${c.email}</td>
+                    <td class="p-4 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${c.type === 'Customer' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}">${c.type === 'Customer' ? 'ลูกค้า' : 'ผู้ขาย'}</span></td>
+                    <td class="p-4 text-center"><button onclick="deleteContact(${index})" class="text-red-500 hover:text-red-700 text-xs font-bold"><i class="fa-solid fa-trash"></i> ลบ</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderReports() {
+            let totalRevenue = appData.documents.reduce((sum, d) => sum + d.subtotal, 0);
+            let totalExpenses = appData.expenses.reduce((sum, e) => sum + e.amount, 0);
+            let netProfit = totalRevenue - totalExpenses;
+            let totalVat = appData.documents.reduce((sum, d) => sum + d.vat, 0);
+
+            document.getElementById('rptNetRevenue').innerText = '฿' + totalRevenue.toFixed(2);
+            document.getElementById('rptNetExpenses').innerText = '฿' + totalExpenses.toFixed(2);
+            document.getElementById('rptProfit').innerText = '฿' + netProfit.toFixed(2);
+            document.getElementById('rptVatBase').innerText = '฿' + totalRevenue.toFixed(2);
+            document.getElementById('rptVatAmount').innerText = '฿' + totalVat.toFixed(2);
+        }
+
+        function deleteDoc(index) { appData.documents.splice(index, 1); renderDocumentsTable(); updateDashboard(); }
+        function deleteExpense(index) { appData.expenses.splice(index, 1); renderExpensesTable(); updateDashboard(); }
+        function deleteProduct(index) { appData.products.splice(index, 1); renderProductsTable(); }
+        function deleteContact(index) { appData.contacts.splice(index, 1); renderContactsTable(); }
+
+        function updateDashboard() {
+            let totalSales = 0;
+            let pendingAmount = 0;
+            appData.documents.forEach(d => {
+                if (d.status === 'Paid') totalSales += d.total;
+                else pendingAmount += d.total;
+            });
+            let totalExpenses = appData.expenses.reduce((sum, e) => sum + e.amount, 0);
+            let netProfit = totalSales - totalExpenses;
+
+            document.getElementById('dashTotalSales').innerText = '฿' + totalSales.toFixed(2);
+            document.getElementById('dashTotalExpenses').innerText = '฿' + totalExpenses.toFixed(2);
+            document.getElementById('dashNetProfit').innerText = '฿' + netProfit.toFixed(2);
+            document.getElementById('dashPendingAmount').innerText = '฿' + pendingAmount.toFixed(2);
+
+            const recentTable = document.getElementById('dashRecentDocsTable');
+            if (appData.documents.length === 0) {
+                recentTable.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-400">ไม่พบรายการเอกสารในระยะเวลานี้</td></tr>`;
+            } else {
+                recentTable.innerHTML = appData.documents.slice(-5).reverse().map(d => `
+                    <tr class="hover:bg-pink-50/50">
+                        <td class="py-3 px-2 font-mono font-medium">${d.id}</td>
+                        <td class="py-3 px-2">${d.date}</td>
+                        <td class="py-3 px-2 font-medium">${d.customer}</td>
+                        <td class="py-3 px-2 text-right font-semibold">฿${d.total.toFixed(2)}</td>
+                        <td class="py-3 px-2 text-center"><span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${d.status === 'Paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${d.status === 'Paid' ? 'ชำระแล้ว' : 'รอชำระ'}</span></td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        // Initialize App on Load
+        window.onload = function() {
+            document.getElementById('cloudUserId').innerText = 'TKP-' + Math.floor(100000 + Math.random() * 900000);
+            renderDocumentsTable();
+            renderExpensesTable();
+            renderProductsTable();
+            renderContactsTable();
+            updateDashboard();
+        };
+    </script>
+</body>
+</html>
