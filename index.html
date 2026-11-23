@@ -901,9 +901,9 @@
                 console.error("Local storage save error:", e);
             }
 
-            if (!db) return;
+            if (!db || !currentUser) return;
             try {
-                const stateRef = doc(db, 'artifacts', appId, 'state', 'tkp7_accounting');
+                const stateRef = doc(db, 'artifacts', appId, 'users', currentUser.uid);
                 await setDoc(stateRef, {
                     documents: JSON.stringify(appData.documents),
                     expenses: JSON.stringify(appData.expenses),
@@ -940,7 +940,7 @@
                     cloudId.innerText = currentUser.uid;
                 }
 
-                const stateRef = doc(db, 'artifacts', appId, 'state', 'tkp7_accounting');
+                const stateRef = doc(db, 'artifacts', appId, 'users', currentUser.uid);
                 onSnapshot(stateRef, (snap) => {
                     if (snap.exists()) {
                         const data = snap.data();
