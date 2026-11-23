@@ -95,7 +95,7 @@
         <!-- Cloud User Footer -->
         <div class="p-4 border-t border-pink-50 bg-pink-50/30 text-xs text-gray-500 space-y-1">
             <span class="font-bold text-gray-700 block">Cloud User ID:</span>
-            <span id="cloudUserId" class="font-mono text-brand-600 font-semibold">Connecting...</span>
+            <span id="cloudUserId" class="font-mono text-brand-600 font-semibold break-all">Connecting...</span>
         </div>
     </aside>
 
@@ -859,8 +859,17 @@
     </div>
 
     <!-- Application JavaScript Logic -->
-    <script>
-        let appData = {
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        const defaultAppData = {
             documents: [],
             expenses: [],
             products: [
@@ -874,78 +883,146 @@
             ]
         };
 
-        function switchTab(tabName) {
-            const tabs = ['dashboard', 'documents', 'expenses', 'products', 'contacts', 'reports'];
-            tabs.forEach(t => {
-                const section = document.getElementById('tab-' + t);
-                const navBtn = document.getElementById('nav-' + t);
-                if (section) {
-                    if (t === tabName) {
-                        section.classList.remove('hidden');
-                    } else {
-                        section.classList.add('hidden');
-                    }
-                }
-                if (navBtn) {
-                    if (t === tabName) {
-                        navBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-brand-700 bg-pink-50 shadow-sm font-semibold";
-                    } else {
-                        navBtn.className = "w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold";
-                    }
-                }
-            });
-            if (tabName === 'reports') {
-                renderReports();
+        let appData = JSON.parse(JSON.stringify(defaultAppData));
+
+        async function syncToCloud() {
+            if (!db || !currentUser) return;
+            try {
+                const stateRef = doc(db, 'artifacts', appId, 'public', 'data', 'tkp7_accounting', 'main_state');
+                await setDoc(stateRef, {
+                    documents: JSON.stringify(appData.documents),
+                    expenses: JSON.stringify(appData.expenses),
+                    products: JSON.stringify(appData.products),
+                    contacts: JSON.stringify(appData.contacts),
+                    updatedAt: new Date().toISOString()
+                });
+            } catch (err) {
+                console.error("Cloud sync error:", err);
             }
         }
 
-        function setDashboardPeriod(period) {
-            ['month', 'quarter', 'year'].forEach(p => {
-                const btn = document.getElementById('dashPeriod' + p.charAt(0).toUpperCase() + p.slice(1));
-                if (btn) {
-                    if (p === period) {
-                        btn.className = "px-4 py-2 pink-gradient text-white rounded-lg shadow-sm font-bold transition";
-                    } else {
-                        btn.className = "px-4 py-2 hover:text-brand-700 rounded-lg text-gray-600 transition font-medium";
-                    }
+        async function initCloudSync() {
+            try {
+                if (typeof __firebase_config === 'undefined') {
+                    const cloudId = document.getElementById('cloudUserId');
+                    if (cloudId) cloudId.innerText = 'offline_mode';
+                    return;
                 }
-            });
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                currentUser = auth.currentUser;
+                const cloudId = document.getElementById('cloudUserId');
+                if (cloudId && currentUser) cloudId.innerText = currentUser.uid;
+
+                if (!currentUser) return;
+
+                const stateRef = doc(db, 'artifacts', appId, 'public', 'data', 'tkp7_accounting', 'main_state');
+                onSnapshot(stateRef, (snap) => {
+                    if (snap.exists()) {
+                        const data = snap.data();
+                        appData.documents = data.documents ? JSON.parse(data.documents) : [];
+                        appData.expenses = data.expenses ? JSON.parse(data.expenses) : [];
+                        appData.products = data.products ? JSON.parse(data.products) : defaultAppData.products;
+                        appData.contacts = data.contacts ? JSON.parse(data.contacts) : defaultAppData.contacts;
+                    } else {
+                        syncToCloud();
+                    }
+                    renderDocumentsTable();
+                    renderExpensesTable();
+                    renderProductsTable();
+                    renderContactsTable();
+                    updateDashboard();
+                    renderReports();
+                }, (error) => {
+                    console.error("Snapshot listener error:", error);
+                });
+            } catch (e) {
+                console.error("Initialization error:", e);
+            }
         }
 
-        function handleFileSelect(input, labelId) {
+        window.switchTab = function(tabName) {
+            ['dashboard', 'documents', 'expenses', 'products', 'contacts', 'reports'].forEach(t => {
+                const sec = document.getElementById('tab-' + t);
+                const nav = document.getElementById('nav-' + t);
+                if (sec) sec.classList.add('hidden');
+                if (nav) {
+                    nav.classList.remove('text-brand-700', 'bg-pink-50', 'shadow-sm');
+                    nav.classList.add('text-gray-600');
+                }
+            });
+            const activeSec = document.getElementById('tab-' + tabName);
+            const activeNav = document.getElementById('nav-' + tabName);
+            if (activeSec) activeSec.classList.remove('hidden');
+            if (activeNav) {
+                activeNav.classList.remove('text-gray-600');
+                activeNav.classList.add('text-brand-700', 'bg-pink-50', 'shadow-sm');
+            }
+        };
+
+        window.setDashboardPeriod = function(period) {
+            ['Month', 'Quarter', 'Year'].forEach(p => {
+                const btn = document.getElementById('dashPeriod' + p);
+                if (!btn) return;
+                if (p.toLowerCase() === period) {
+                    btn.className = "px-4 py-2 pink-gradient text-white rounded-lg shadow-sm font-bold transition";
+                } else {
+                    btn.className = "px-4 py-2 hover:text-brand-700 rounded-lg text-gray-600 transition font-medium";
+                }
+            });
+            updateDashboard();
+        };
+
+        window.handleFileSelect = function(input, labelId) {
             const label = document.getElementById(labelId);
-            if (label && input.files && input.files[0]) {
+            if (!label) return;
+            if (input.files && input.files[0]) {
                 label.innerText = input.files[0].name;
-            } else if (label) {
+                label.classList.remove('text-gray-400');
+                label.classList.add('text-brand-700', 'font-semibold');
+            } else {
                 label.innerText = 'ไม่ได้เลือกไฟล์ใด';
+                label.classList.remove('text-brand-700', 'font-semibold');
+                label.classList.add('text-gray-400');
             }
-        }
+        };
 
-        function handleImageUpload(input, labelId, dataInputId) {
+        window.handleImageUpload = function(input, labelId, dataInputId) {
             const label = document.getElementById(labelId);
             const dataInput = document.getElementById(dataInputId);
             if (input.files && input.files[0]) {
-                if (label) label.innerText = input.files[0].name;
+                const file = input.files[0];
+                if (label) {
+                    label.innerText = file.name;
+                    label.classList.remove('text-gray-400');
+                    label.classList.add('text-brand-700', 'font-semibold');
+                }
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     if (dataInput) dataInput.value = e.target.result;
                 };
-                reader.readAsDataURL(input.files[0]);
-            } else {
-                if (label) label.innerText = 'ไม่ได้เลือกไฟล์ใด';
-                if (dataInput) dataInput.value = '';
+                reader.readAsDataURL(file);
             }
-        }
+        };
 
         // Document Print Preview Handlers
-        function openPrintPreview(index) {
+        window.openPrintPreview = function(index) {
             const doc = appData.documents[index];
             if (!doc) return;
 
-            const issuer = appData.contacts.find(c => c.name === doc.issuer) || {
-                name: doc.issuer || 'บริษัท ทีเคพี เซเว่น โปรโซลูชั่น จำกัด',
-                taxId: '0135569027610',
+            const issuer = appData.contacts.find(c => c.name === doc.issuer) || appData.contacts.find(c => c.type === 'Vendor') || {
+                name: 'บริษัท ทีเคพี เซเว่น โปรโซลูชั่น จำกัด',
                 address: '99/194 ม.3 ตำบลคลองสอง อำเภอคลองหลวง จังหวัด ปทุมธานี 12120',
+                taxId: '0135569027610',
                 phone: '0660927070',
                 email: 'tanthaizero@gmail.com',
                 sigData: '',
@@ -960,7 +1037,6 @@
                 email: '-'
             };
 
-            // Map Thai title to Uppercase English format matching reference
             let titleText = 'ใบเสนอราคา / QUOTATION';
             if (doc.type.includes('Invoice')) titleText = 'ใบแจ้งหนี้ / INVOICE';
             else if (doc.type.includes('Receipt')) titleText = 'ใบเสร็จรับเงิน / RECEIPT';
@@ -982,7 +1058,6 @@
             document.getElementById('prevCustEmail').innerText = customer.email || '-';
             document.getElementById('prevDocStatus').innerText = doc.status === 'Paid' ? 'ชำระแล้ว' : 'รอชำระ';
 
-            // Populate Items
             const itemsBody = document.getElementById('prevItemsBody');
             const items = doc.items && doc.items.length > 0 ? doc.items : [];
             let rawSubtotal = 0;
@@ -1020,7 +1095,6 @@
 
             document.getElementById('prevGrandTotal').innerText = '฿' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-            // Stamp & Signature Visuals
             const stampSigContainer = document.getElementById('prevIssuerStampSig');
             let stampSigHtml = '';
             if (issuer.stampData) {
@@ -1032,13 +1106,13 @@
             stampSigContainer.innerHTML = stampSigHtml;
 
             document.getElementById('printPreviewModal').classList.remove('hidden');
-        }
+        };
 
-        function closePrintPreview() {
+        window.closePrintPreview = function() {
             document.getElementById('printPreviewModal').classList.add('hidden');
-        }
+        };
 
-        function openStandalonePrint() {
+        window.openStandalonePrint = function() {
             const content = document.getElementById('printableDocumentArea').innerHTML;
             const win = window.open('', '_blank');
             if (!win) return;
@@ -1062,10 +1136,10 @@
                 </html>
             `);
             win.document.close();
-        }
+        };
 
         // Document Modal & Handlers
-        function openNewDocModal(editIndex = -1) {
+        window.openNewDocModal = function(editIndex = -1) {
             const form = document.getElementById('docForm');
             if (form) form.reset();
             populateDocDropdowns();
@@ -1096,10 +1170,10 @@
             }
             calculateDocTotals();
             document.getElementById('docModal').classList.remove('hidden');
-        }
-        function closeDocModal() { document.getElementById('docModal').classList.add('hidden'); }
+        };
+        window.closeDocModal = function() { document.getElementById('docModal').classList.add('hidden'); };
 
-        function handleDocTypeChange() {
+        window.handleDocTypeChange = function() {
             const editIndex = parseInt(document.getElementById('docEditIndex').value);
             if (editIndex >= 0) return;
             const docType = document.getElementById('docType').value;
@@ -1107,7 +1181,7 @@
             if (docType.includes('Quotation')) prefix = 'QT-';
             else if (docType.includes('Receipt')) prefix = 'REC-';
             document.getElementById('docId').value = prefix + '2026-' + Math.floor(100 + Math.random() * 900);
-        }
+        };
 
         function populateDocDropdowns() {
             const issuerSelect = document.getElementById('docIssuerSelect');
@@ -1126,7 +1200,7 @@
             }
         }
 
-        function addDocItemRow(itemData = null) {
+        window.addDocItemRow = function(itemData = null) {
             const tbody = document.getElementById('docItemsTableBody');
             if (!tbody) return;
             const tr = document.createElement('tr');
@@ -1164,9 +1238,9 @@
             `;
             tbody.appendChild(tr);
             calculateDocTotals();
-        }
+        };
 
-        function handleDocItemSelect(selectElem) {
+        window.handleDocItemSelect = function(selectElem) {
             const option = selectElem.options[selectElem.selectedIndex];
             const tr = selectElem.closest('tr');
             if (!tr) return;
@@ -1177,17 +1251,17 @@
                 priceInput.value = parseFloat(option.getAttribute('data-price')) || 0;
             }
             calculateDocTotals();
-        }
+        };
 
-        function removeDocItemRow(btn) {
+        window.removeDocItemRow = function(btn) {
             const tbody = document.getElementById('docItemsTableBody');
             if (tbody && tbody.querySelectorAll('tr').length > 1) {
                 btn.closest('tr').remove();
                 calculateDocTotals();
             }
-        }
+        };
 
-        function calculateDocTotals() {
+        window.calculateDocTotals = function() {
             let subtotal = 0;
             document.querySelectorAll('#docItemsTableBody .doc-item-row').forEach(tr => {
                 const qty = parseFloat(tr.querySelector('.item-qty')?.value) || 0;
@@ -1223,9 +1297,9 @@
             if (document.getElementById('docVatText')) document.getElementById('docVatText').innerText = '฿' + vat.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             if (document.getElementById('docWhtText')) document.getElementById('docWhtText').innerText = '-฿' + wht.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             if (document.getElementById('docTotalText')) document.getElementById('docTotalText').innerText = '฿' + grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
+        };
 
-        function saveDocument(e) {
+        window.saveDocument = function(e) {
             e.preventDefault();
             const editIndex = parseInt(document.getElementById('docEditIndex').value);
             const items = [];
@@ -1275,16 +1349,20 @@
                 appData.documents.unshift(docObj);
             }
 
+            syncToCloud();
             closeDocModal();
             renderDocumentsTable();
             updateDashboard();
-        }
+            renderReports();
+        };
 
-        function deleteDocument(index) {
+        window.deleteDocument = function(index) {
             appData.documents.splice(index, 1);
+            syncToCloud();
             renderDocumentsTable();
             updateDashboard();
-        }
+            renderReports();
+        };
 
         // Expense Modal & Handlers
         function populateExpenseVendors() {
@@ -1296,7 +1374,7 @@
             });
         }
 
-        function openNewExpenseModal(editIndex = -1) {
+        window.openNewExpenseModal = function(editIndex = -1) {
             const form = document.getElementById('expenseForm');
             if (form) form.reset();
             populateExpenseVendors();
@@ -1319,10 +1397,10 @@
             }
             calculateExpenseTotals();
             document.getElementById('expenseModal').classList.remove('hidden');
-        }
-        function closeExpenseModal() { document.getElementById('expenseModal').classList.add('hidden'); }
+        };
+        window.closeExpenseModal = function() { document.getElementById('expenseModal').classList.add('hidden'); };
 
-        function calculateExpenseTotals() {
+        window.calculateExpenseTotals = function() {
             const amount = parseFloat(document.getElementById('expAmount')?.value) || 0;
             const taxType = document.getElementById('expTaxType')?.value || 'none';
             let vat = 0;
@@ -1336,9 +1414,9 @@
             if (document.getElementById('expVatText')) document.getElementById('expVatText').innerText = '฿' + vat.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             if (document.getElementById('expWhtText')) document.getElementById('expWhtText').innerText = '-฿' + wht.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             if (document.getElementById('expNetTotalText')) document.getElementById('expNetTotalText').innerText = '฿' + netTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        }
+        };
 
-        function saveExpense(e) {
+        window.saveExpense = function(e) {
             e.preventDefault();
             const editIndex = parseInt(document.getElementById('expEditIndex').value);
             const amount = parseFloat(document.getElementById('expAmount').value) || 0;
@@ -1371,19 +1449,23 @@
                 appData.expenses.unshift(expObj);
             }
 
+            syncToCloud();
             closeExpenseModal();
             renderExpensesTable();
             updateDashboard();
-        }
+            renderReports();
+        };
 
-        function deleteExpense(index) {
+        window.deleteExpense = function(index) {
             appData.expenses.splice(index, 1);
+            syncToCloud();
             renderExpensesTable();
             updateDashboard();
-        }
+            renderReports();
+        };
 
         // Product Modal & Handlers
-        function openProductModal(editIndex = -1) {
+        window.openProductModal = function(editIndex = -1) {
             const form = document.getElementById('productForm');
             if (form) form.reset();
             if (editIndex >= 0) {
@@ -1400,10 +1482,10 @@
                 document.getElementById('productModalTitle').innerHTML = `<i class="fa-solid fa-box text-brand-600"></i> เพิ่มสินค้าใหม่`;
             }
             document.getElementById('productModal').classList.remove('hidden');
-        }
-        function closeProductModal() { document.getElementById('productModal').classList.add('hidden'); }
+        };
+        window.closeProductModal = function() { document.getElementById('productModal').classList.add('hidden'); };
 
-        function saveProduct(e) {
+        window.saveProduct = function(e) {
             e.preventDefault();
             const editIndex = parseInt(document.getElementById('prodEditIndex').value);
             const prodObj = {
@@ -1418,17 +1500,19 @@
             } else {
                 appData.products.push(prodObj);
             }
+            syncToCloud();
             closeProductModal();
             renderProductsTable();
-        }
+        };
 
-        function deleteProduct(index) {
+        window.deleteProduct = function(index) {
             appData.products.splice(index, 1);
+            syncToCloud();
             renderProductsTable();
-        }
+        };
 
         // Contact Modal & Handlers
-        function openContactModal(editIndex = -1, defaultType = 'Customer') {
+        window.openContactModal = function(editIndex = -1, defaultType = 'Customer') {
             const form = document.getElementById('contactForm');
             if (form) form.reset();
             const sigLabel = document.getElementById('contSigName');
@@ -1458,17 +1542,19 @@
                 document.getElementById('contactModalTitle').innerHTML = `<i class="fa-solid fa-user-plus"></i> เพิ่มผู้ติดต่อ`;
             }
             document.getElementById('contactModal').classList.remove('hidden');
-        }
+        };
 
-        function closeContactModal() {
+        window.closeContactModal = function() {
             document.getElementById('contactModal').classList.add('hidden');
-        }
+        };
 
-        function saveContact(e) {
+        window.saveContact = function(e) {
             e.preventDefault();
             const editIndex = parseInt(document.getElementById('contEditIndex').value);
             const sigLabel = document.getElementById('contSigName');
             const stampLabel = document.getElementById('contStampName');
+            const prevIssuer = document.getElementById('docIssuerSelect')?.value || '';
+            const prevCustomer = document.getElementById('docCustomerSelect')?.value || '';
 
             const contData = {
                 name: document.getElementById('contName').value,
@@ -1483,15 +1569,13 @@
                 stampData: document.getElementById('contStampData')?.value || ''
             };
 
-            const prevIssuer = document.getElementById('docIssuerSelect')?.value;
-            const prevCustomer = document.getElementById('docCustomerSelect')?.value;
-
             if (editIndex >= 0) {
                 appData.contacts[editIndex] = contData;
             } else {
                 appData.contacts.push(contData);
             }
 
+            syncToCloud();
             closeContactModal();
             renderContactsTable();
             populateDocDropdowns();
@@ -1507,15 +1591,16 @@
                     if (document.getElementById('docIssuerSelect') && prevIssuer) document.getElementById('docIssuerSelect').value = prevIssuer;
                 }
             }
-        }
+        };
 
-        function deleteContact(index) {
+        window.deleteContact = function(index) {
             appData.contacts.splice(index, 1);
+            syncToCloud();
             renderContactsTable();
-        }
+        };
 
         // Render Tables & Dashboard
-        function renderDocumentsTable() {
+        window.renderDocumentsTable = function() {
             const tbody = document.getElementById('documentsTable');
             if (!tbody) return;
             const search = (document.getElementById('searchDocumentsInput')?.value || '').toLowerCase();
@@ -1526,7 +1611,7 @@
                 return;
             }
 
-            tbody.innerHTML = filtered.map((d, idx) => {
+            tbody.innerHTML = filtered.map((d) => {
                 const origIdx = appData.documents.indexOf(d);
                 const statusBadge = d.status === 'Paid'
                     ? `<span class="bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full text-xs font-bold">ชำระแล้ว</span>`
@@ -1547,9 +1632,9 @@
                     </tr>
                 `;
             }).join('');
-        }
+        };
 
-        function renderExpensesTable() {
+        window.renderExpensesTable = function() {
             const tbody = document.getElementById('expensesTable');
             if (!tbody) return;
             const search = (document.getElementById('searchExpensesInput')?.value || '').toLowerCase();
@@ -1580,9 +1665,9 @@
                     </tr>
                 `;
             }).join('');
-        }
+        };
 
-        function renderProductsTable() {
+        window.renderProductsTable = function() {
             const tbody = document.getElementById('productsTable');
             if (!tbody) return;
             const search = (document.getElementById('searchProductsInput')?.value || '').toLowerCase();
@@ -1609,9 +1694,9 @@
                     </tr>
                 `;
             }).join('');
-        }
+        };
 
-        function renderContactsTable() {
+        window.renderContactsTable = function() {
             const tbody = document.getElementById('contactsTable');
             if (!tbody) return;
             const search = (document.getElementById('searchContactsInput')?.value || '').toLowerCase();
@@ -1642,9 +1727,9 @@
                     </tr>
                 `;
             }).join('');
-        }
+        };
 
-        function updateDashboard() {
+        window.updateDashboard = function() {
             const paidSales = appData.documents.filter(d => d.status === 'Paid').reduce((sum, d) => sum + d.total, 0);
             const pendingSales = appData.documents.filter(d => d.status === 'Pending').reduce((sum, d) => sum + d.total, 0);
             const totalExpenses = appData.expenses.reduce((sum, e) => sum + e.netTotal, 0);
@@ -1676,9 +1761,9 @@
                     }).join('');
                 }
             }
-        }
+        };
 
-        function renderReports() {
+        window.renderReports = function() {
             const netRev = appData.documents.filter(d => d.status === 'Paid').reduce((sum, d) => sum + (d.subtotal || 0), 0);
             const vatAmt = appData.documents.filter(d => d.status === 'Paid').reduce((sum, d) => sum + (d.vat || 0), 0);
             const netExp = appData.expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
@@ -1693,18 +1778,17 @@
             if (document.getElementById('rptWht3')) document.getElementById('rptWht3').innerText = '฿' + wht3.toLocaleString('en-US', { minimumFractionDigits: 2 });
             if (document.getElementById('rptWht5')) document.getElementById('rptWht5').innerText = '฿' + wht5.toLocaleString('en-US', { minimumFractionDigits: 2 });
             if (document.getElementById('rptTotalWht')) document.getElementById('rptTotalWht').innerText = '฿' + (wht3 + wht5).toLocaleString('en-US', { minimumFractionDigits: 2 });
-        }
+        };
 
-        window.onload = function() {
-            const cloudId = document.getElementById('cloudUserId');
-            if (cloudId) cloudId.innerText = 'tkp7_sync_live_01';
+        window.addEventListener('DOMContentLoaded', () => {
             renderDocumentsTable();
             renderExpensesTable();
             renderProductsTable();
             renderContactsTable();
             updateDashboard();
             renderReports();
-        };
+            initCloudSync();
+        });
     </script>
 </body>
 </html>
