@@ -410,9 +410,10 @@
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">ประเภทเอกสาร</label>
                         <select id="docType" onchange="handleDocTypeChange()" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
-                            <option value="ใบเสนอราคา (Quotation)">ใบเสนอราคา (Quotation)</option>
                             <option value="ใบแจ้งหนี้ (Invoice)">ใบแจ้งหนี้ (Invoice)</option>
+                            <option value="ใบเสนอราคา (Quotation)">ใบเสนอราคา (Quotation)</option>
                             <option value="ใบเสร็จรับเงิน (Receipt)">ใบเสร็จรับเงิน (Receipt)</option>
+                            <option value="ใบเสร็จรับเงิน / ใบกำกับภาษี (Receipt / Tax Invoice)">ใบเสร็จรับเงิน / ใบกำกับภาษี (Receipt / Tax Invoice)</option>
                         </select>
                     </div>
                     <div>
@@ -897,7 +898,6 @@
 
             if (!db) return;
             try {
-                // Use standard public collection path so that Firestore rules allow read/write without auth obstacles
                 const stateRef = doc(db, 'artifacts', appId, 'public', 'tkp7_accounting_state');
                 await setDoc(stateRef, {
                     documents: JSON.stringify(appData.documents),
@@ -916,20 +916,10 @@
                 if (typeof __firebase_config === 'undefined' || !__firebase_config) {
                     return;
                 }
-                const firebaseConfig = {
-  apiKey: "AIzaSyAs-M2LnjgE7OADtio6bgGyn1TP58WQXwY",
-  authDomain: "tkp7-accounting.firebaseapp.com",
-  databaseURL: "https://tkp7-accounting-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "tkp7-accounting",
-  storageBucket: "tkp7-accounting.firebasestorage.app",
-  messagingSenderId: "125667880474",
-  appId: "1:125667880474:web:94d9aec9d20af3d311aba3",
-  measurementId: "G-ZML2XNBQ1N"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+                const firebaseConfig = JSON.parse(__firebase_config);
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
 
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
@@ -1051,6 +1041,7 @@ const analytics = getAnalytics(app);
 
             let titleText = 'ใบเสนอราคา / QUOTATION';
             if (doc.type.includes('Invoice')) titleText = 'ใบแจ้งหนี้ / INVOICE';
+            else if (doc.type.includes('Tax Invoice')) titleText = 'ใบเสร็จรับเงิน / ใบกำกับภาษี';
             else if (doc.type.includes('Receipt')) titleText = 'ใบเสร็จรับเงิน / RECEIPT';
 
             document.getElementById('prevIssuerName').innerText = issuer.name;
@@ -1191,6 +1182,7 @@ const analytics = getAnalytics(app);
             const docType = document.getElementById('docType').value;
             let prefix = 'INV-';
             if (docType.includes('Quotation')) prefix = 'QT-';
+            else if (docType.includes('Tax Invoice')) prefix = 'IVT-';
             else if (docType.includes('Receipt')) prefix = 'REC-';
             document.getElementById('docId').value = prefix + '2026-' + Math.floor(100 + Math.random() * 900);
         };
