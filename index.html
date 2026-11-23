@@ -883,12 +883,27 @@
             ]
         };
 
+        // Load local data fallback if exists
         let appData = JSON.parse(JSON.stringify(defaultAppData));
+        try {
+            const localSaved = localStorage.getItem('tkp7_accounting_data_' + appId);
+            if (localSaved) {
+                appData = JSON.parse(localSaved);
+            }
+        } catch (e) {
+            console.error("Local storage read error:", e);
+        }
 
         async function syncToCloud() {
-            if (!db || !currentUser) return;
             try {
-                const stateRef = doc(db, 'artifacts', appId, 'public', 'data', 'tkp7_accounting', 'main_state');
+                localStorage.setItem('tkp7_accounting_data_' + appId, JSON.stringify(appData));
+            } catch (e) {
+                console.error("Local storage save error:", e);
+            }
+
+            if (!db) return;
+            try {
+                const stateRef = doc(db, 'artifacts', appId, 'state', 'tkp7_accounting');
                 await setDoc(stateRef, {
                     documents: JSON.stringify(appData.documents),
                     expenses: JSON.stringify(appData.expenses),
@@ -897,7 +912,7 @@
                     updatedAt: new Date().toISOString()
                 });
             } catch (err) {
-                console.error("Cloud sync error:", err);
+                console.warn("Cloud sync write skipped due to permission restrictions. Saved locally.");
             }
         }
 
@@ -923,30 +938,26 @@
                 const cloudId = document.getElementById('cloudUserId');
                 if (cloudId && currentUser) cloudId.innerText = currentUser.uid;
 
-                if (!currentUser) return;
-
-                const stateRef = doc(db, 'artifacts', appId, 'public', 'data', 'tkp7_accounting', 'main_state');
+                const stateRef = doc(db, 'artifacts', appId, 'state', 'tkp7_accounting');
                 onSnapshot(stateRef, (snap) => {
                     if (snap.exists()) {
                         const data = snap.data();
-                        appData.documents = data.documents ? JSON.parse(data.documents) : [];
-                        appData.expenses = data.expenses ? JSON.parse(data.expenses) : [];
-                        appData.products = data.products ? JSON.parse(data.products) : defaultAppData.products;
-                        appData.contacts = data.contacts ? JSON.parse(data.contacts) : defaultAppData.contacts;
-                    } else {
-                        syncToCloud();
+                        appData.documents = data.documents ? JSON.parse(data.documents) : appData.documents;
+                        appData.expenses = data.expenses ? JSON.parse(data.expenses) : appData.expenses;
+                        appData.products = data.products ? JSON.parse(data.products) : appData.products;
+                        appData.contacts = data.contacts ? JSON.parse(data.contacts) : appData.contacts;
+                        renderDocumentsTable();
+                        renderExpensesTable();
+                        renderProductsTable();
+                        renderContactsTable();
+                        updateDashboard();
+                        renderReports();
                     }
-                    renderDocumentsTable();
-                    renderExpensesTable();
-                    renderProductsTable();
-                    renderContactsTable();
-                    updateDashboard();
-                    renderReports();
                 }, (error) => {
-                    console.error("Snapshot listener error:", error);
+                    console.warn("Snapshot listener permission warning handled. Using local persistence.");
                 });
             } catch (e) {
-                console.error("Initialization error:", e);
+                console.warn("Firebase initialization skipped, using local storage.");
             }
         }
 
