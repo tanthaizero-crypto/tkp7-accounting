@@ -3,28 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TKP7 Accounting App</title>
+    <title>TKP7 Accounting (Cloud Sync)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Font: Prompt or Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Inter & Sarabun -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
                         brand: {
-                            50: '#fdf2f4',
-                            100: '#fbe8ec',
-                            500: '#e11d48',
-                            600: '#be123c',
-                            700: '#9f1239'
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
                         }
                     },
                     fontFamily: {
-                        sans: ['Prompt', 'sans-serif']
+                        sans: ['Sarabun', 'Inter', 'sans-serif'],
                     }
                 }
             }
@@ -32,67 +32,59 @@
     </script>
     <style>
         .pink-gradient {
-            background: linear-gradient(135deg, #e11d48 0%, #be123c 100%);
-        }
-        body {
-            font-family: 'Prompt', sans-serif;
-            background-color: #faf7f8;
+            background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);
         }
     </style>
 </head>
-<body class="min-h-screen flex bg-gray-50 text-gray-800">
+<body class="bg-gray-50/50 font-sans text-gray-800 antialiased min-h-screen">
 
     <!-- Sidebar (Fixed Left) -->
-    <aside class="fixed inset-y-0 left-0 z-20 w-64 bg-white border-r border-pink-100 flex flex-col justify-between shadow-sm">
-        <div>
-            <!-- Logo Section -->
-            <div class="p-6 border-b border-pink-100 flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="pink-gradient text-white font-bold p-2.5 rounded-xl shadow">
-                        <i class="fa-solid fa-calculator text-lg"></i>
-                    </div>
-                    <div>
-                        <h1 class="font-bold text-gray-900 tracking-wide text-base">TKP7 Accounting</h1>
-                        <p class="text-[11px] text-emerald-600 font-semibold flex items-center gap-1">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ออนไลน์ (Cloud Sync)
-                        </p>
-                    </div>
-                </div>
+    <aside class="fixed inset-y-0 left-0 z-20 w-64 bg-white border-r border-pink-100 flex flex-col shadow-sm">
+        <!-- Logo Header -->
+        <div class="p-6 border-b border-pink-50 flex items-center space-x-3">
+            <div class="pink-gradient text-white w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl shadow">
+                TKP
             </div>
-
-            <!-- Navigation Menu -->
-            <nav class="p-4 space-y-1.5 text-sm font-medium">
-                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-brand-700 bg-pink-50 shadow-sm font-semibold">
-                    <i class="fa-solid fa-chart-pie w-5 text-base"></i> แดชบอร์ดภาพรวม
-                </button>
-                <button onclick="switchTab('documents')" id="nav-documents" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold">
-                    <i class="fa-solid fa-file-invoice-dollar w-5 text-base"></i> เอกสารการขาย
-                </button>
-                <button onclick="switchTab('expenses')" id="nav-expenses" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold">
-                    <i class="fa-solid fa-receipt w-5 text-base"></i> บันทึกรายจ่าย
-                </button>
-                <button onclick="switchTab('products')" id="nav-products" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold">
-                    <i class="fa-solid fa-box-archive w-5 text-base"></i> สินค้าและบริการ
-                </button>
-                <button onclick="switchTab('contacts')" id="nav-contacts" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold">
-                    <i class="fa-solid fa-address-book w-5 text-base"></i> ผู้ติดต่อ (ลูกค้า / ผู้ขาย)
-                </button>
-                <button onclick="switchTab('reports')" id="nav-reports" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold">
-                    <i class="fa-solid fa-chart-line w-5 text-base"></i> รายงานบัญชีและการเงิน
-                </button>
-            </nav>
+            <div>
+                <h1 class="font-bold text-gray-900 text-lg leading-tight">TKP7 Accounting</h1>
+                <span class="text-[11px] text-emerald-600 font-semibold flex items-center gap-1 mt-0.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ออนไลน์ (Cloud Sync)
+                </span>
+            </div>
         </div>
 
+        <!-- Navigation Links -->
+        <nav class="flex-1 px-4 py-4 space-y-1.5 overflow-y-auto text-sm">
+            <button onclick="switchTab('dashboard')" id="nav-dashboard" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-brand-700 bg-pink-50 shadow-sm font-semibold">
+                <i class="fa-solid fa-chart-pie w-5 text-base"></i> แดชบอร์ดภาพรวม
+            </button>
+            <button onclick="switchTab('documents')" id="nav-documents" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold">
+                <i class="fa-solid fa-file-invoice-dollar w-5 text-base"></i> เอกสารการขาย
+            </button>
+            <button onclick="switchTab('expenses')" id="nav-expenses" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold">
+                <i class="fa-solid fa-receipt w-5 text-base"></i> บันทึกรายจ่าย
+            </button>
+            <button onclick="switchTab('products')" id="nav-products" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold">
+                <i class="fa-solid fa-box-archive w-5 text-base"></i> สินค้าและบริการ
+            </button>
+            <button onclick="switchTab('contacts')" id="nav-contacts" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold">
+                <i class="fa-solid fa-address-book w-5 text-base"></i> ผู้ติดต่อ (ลูกค้า / ผู้ขาย)
+            </button>
+            <button onclick="switchTab('reports')" id="nav-reports" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition text-gray-600 hover:bg-pink-50 hover:text-brand-700 font-semibold">
+                <i class="fa-solid fa-chart-line w-5 text-base"></i> รายงานบัญชีและการเงิน
+            </button>
+        </nav>
+
         <!-- Cloud User Footer -->
-        <div class="p-4 border-t border-pink-100 bg-pink-50/40 text-xs text-gray-500">
-            <span class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider">Cloud User ID:</span>
-            <span id="cloudUserId" class="font-mono font-bold text-brand-700 truncate block mt-0.5">Connecting...</span>
+        <div class="p-4 border-t border-pink-50 bg-pink-50/30 text-xs text-gray-500 space-y-1">
+            <span class="font-bold text-gray-700 block">Cloud User ID:</span>
+            <span id="cloudUserId" class="font-mono text-brand-600 font-semibold">Connecting...</span>
         </div>
     </aside>
 
-    <!-- Main Content Container -->
-    <main class="ml-64 flex-1 p-8 overflow-y-auto min-h-screen">
-
+    <!-- Main Content Area (With left margin for fixed sidebar) -->
+    <main class="ml-64 p-8 min-h-screen">
+        
         <!-- Tab 1: Dashboard -->
         <section id="tab-dashboard" class="space-y-6">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -224,10 +216,7 @@
                                 <th class="p-4">หมวดหมู่</th>
                                 <th class="p-4">รายละเอียด</th>
                                 <th class="p-4">ผู้ให้บริการ / ผู้ขาย</th>
-                                <th class="p-4 text-right">จำนวนเงิน (ก่อน VAT)</th>
-                                <th class="p-4 text-right">ภาษี VAT (7%)</th>
-                                <th class="p-4 text-right">หัก ณ ที่จ่าย (WHT)</th>
-                                <th class="p-4 text-right">ยอดชำระสุทธิ</th>
+                                <th class="p-4 text-right">จำนวนเงินสุทธิ</th>
                                 <th class="p-4 text-center">หลักฐาน</th>
                                 <th class="p-4 text-center">จัดการ</th>
                             </tr>
@@ -395,71 +384,59 @@
 
     </main>
 
-    <!-- Modals -->
-
-    <!-- Document Modal -->
+    <!-- Modal 1: ออกเอกสารใหม่ (Exact Reference Match) -->
     <div id="docModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 class="text-lg font-bold text-brand-700 flex items-center gap-2">
-                    <i class="fa-solid fa-file-invoice"></i> ออกเอกสารใหม่
+                    <i class="fa-solid fa-file-circle-plus"></i> ออกเอกสารใหม่
                 </h3>
                 <button onclick="closeDocModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form id="docForm" onsubmit="saveDocument(event)" class="space-y-4 text-xs">
-                <!-- Row 1: Document Type & ID -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <input type="hidden" id="docEditIndex" value="-1">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">ประเภทเอกสาร</label>
-                        <select id="docType" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                        <select id="docType" onchange="handleDocTypeChange()" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                            <option value="ใบเสนอราคา (Quotation)">ใบเสนอราคา (Quotation)</option>
                             <option value="ใบแจ้งหนี้ (Invoice)">ใบแจ้งหนี้ (Invoice)</option>
                             <option value="ใบเสร็จรับเงิน (Receipt)">ใบเสร็จรับเงิน (Receipt)</option>
-                            <option value="ใบกำกับภาษี (Tax Invoice)">ใบกำกับภาษี (Tax Invoice)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">เลขที่เอกสาร</label>
-                        <input type="text" id="docId" required class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                        <input type="text" id="docId" required class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-mono font-bold focus:outline-none focus:border-brand-500">
                     </div>
                 </div>
-
-                <!-- Row 2: Issuer & Customer -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <label class="font-bold text-gray-700">เลือกผู้ขาย / ผู้ออกเอกสาร</label>
-                            <button type="button" onclick="openContactModal()" class="text-brand-600 hover:underline font-bold flex items-center gap-1 text-[11px]">
-                                <i class="fa-solid fa-user-plus"></i> เพิ่มผู้ขายใหม่
-                            </button>
-                        </div>
+                        <label class="block font-bold text-gray-700 mb-1 flex justify-between items-center">
+                            <span>เลือกผู้ขาย / ผู้ออกเอกสาร</span>
+                            <button type="button" onclick="openContactModal(-1, 'Vendor')" class="text-brand-600 hover:underline font-bold text-[11px]"><i class="fa-solid fa-user-plus"></i> เพิ่มผู้ขายใหม่</button>
+                        </label>
                         <select id="docIssuerSelect" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
                             <option value="">-- เลือกผู้ออกเอกสาร --</option>
                         </select>
-                        <div class="mt-1 flex items-center gap-2">
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-pink-50 text-brand-700 font-semibold text-[11px]">
-                                <i class="fa-solid fa-circle-exclamation text-rose-500"></i> ลายเซ็น/ตรายาง:
-                            </span>
-                            <span class="text-amber-600 font-medium text-[11px]">⚠️ ยังไม่ได้ลงทะเบียนลายเซ็น/ตรายาง</span>
-                        </div>
                     </div>
                     <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <label class="font-bold text-gray-700">เลือกชื่อลูกค้า</label>
-                            <button type="button" onclick="openContactModal()" class="text-brand-600 hover:underline font-bold flex items-center gap-1 text-[11px]">
-                                <i class="fa-solid fa-user-plus"></i> เพิ่มลูกค้าใหม่
-                            </button>
-                        </div>
+                        <label class="block font-bold text-gray-700 mb-1 flex justify-between items-center">
+                            <span>เลือกชื่อลูกค้า</span>
+                            <button type="button" onclick="openContactModal(-1, 'Customer')" class="text-brand-600 hover:underline font-bold text-[11px]"><i class="fa-solid fa-user-plus"></i> เพิ่มลูกค้าใหม่</button>
+                        </label>
                         <select id="docCustomerSelect" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
                             <option value="">-- เลือกข้อมูลลูกค้า --</option>
                         </select>
                     </div>
                 </div>
-
-                <!-- Row 3: Date & Status -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="flex items-center gap-2 bg-amber-50 p-2.5 rounded-xl border border-amber-100 text-[11px] text-amber-800">
+                    <span class="font-bold"><i class="fa-solid fa-stamp text-brand-600"></i> ลายเซ็น/ตรายาง:</span>
+                    <span>แนบอัตโนมัติจากข้อมูลผู้ติดต่อที่เลือก</span>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">วันที่</label>
-                        <input type="date" id="docDate" required class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                        <input type="date" id="docDate" required class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">สถานะ</label>
@@ -470,43 +447,34 @@
                     </div>
                 </div>
 
-                <!-- Section: Items Table -->
+                <!-- Items Section -->
                 <div class="space-y-2 pt-2 border-t border-gray-100">
                     <div class="flex justify-between items-center">
-                        <span class="font-bold text-brand-700 flex items-center gap-1.5">
-                            <i class="fa-solid fa-box"></i> รายการสินค้า / บริการในเอกสาร
-                        </span>
-                        <div class="flex gap-2">
-                            <button type="button" onclick="openProductModal()" class="px-2.5 py-1 bg-emerald-50 text-emerald-700 font-bold rounded-lg text-[11px] hover:bg-emerald-100 transition flex items-center gap-1">
-                                <i class="fa-solid fa-circle-plus"></i> สร้างสินค้าใหม่
-                            </button>
-                            <button type="button" onclick="addDocItemRow()" class="px-2.5 py-1 bg-pink-50 text-brand-700 font-bold rounded-lg text-[11px] hover:bg-pink-100 transition flex items-center gap-1">
-                                <i class="fa-solid fa-plus"></i> เพิ่มรายการสินค้า
-                            </button>
-                        </div>
+                        <span class="font-bold text-brand-700 flex items-center gap-1.5"><i class="fa-solid fa-boxes-stacked"></i> รายการสินค้า / บริการในเอกสาร</span>
+                        <button type="button" onclick="addDocItemRow()" class="bg-pink-50 hover:bg-pink-100 text-brand-700 px-3 py-1.5 rounded-lg font-bold text-xs flex items-center gap-1 transition">
+                            <i class="fa-solid fa-plus"></i> เพิ่มรายการสินค้า
+                        </button>
                     </div>
-
-                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-2 overflow-x-auto">
+                    <div class="overflow-x-auto border border-gray-100 rounded-xl">
                         <table class="w-full text-left text-xs">
-                            <thead>
-                                <tr class="text-gray-500 font-bold border-b border-gray-200 pb-2">
-                                    <th class="p-2 w-36">รหัสสินค้า</th>
-                                    <th class="p-2">ชื่อสินค้า / รายละเอียด</th>
-                                    <th class="p-2 w-20 text-center">จำนวน</th>
-                                    <th class="p-2 w-28 text-right">ราคา/หน่วย</th>
-                                    <th class="p-2 w-28 text-right">รวม (บาท)</th>
-                                    <th class="p-2 w-12 text-center">ลบ</th>
+                            <thead class="bg-pink-50/70 text-brand-700 font-bold">
+                                <tr>
+                                    <th class="p-2.5 w-1/4">รหัสสินค้า</th>
+                                    <th class="p-2.5 w-2/5">ชื่อสินค้า / รายละเอียด</th>
+                                    <th class="p-2.5 text-center w-16">จำนวน</th>
+                                    <th class="p-2.5 text-right w-24">ราคา/หน่วย</th>
+                                    <th class="p-2.5 text-right w-24">รวม (บาท)</th>
+                                    <th class="p-2.5 text-center w-12">ลบ</th>
                                 </tr>
                             </thead>
-                            <tbody id="docItemsTableBody" class="divide-y divide-gray-200">
-                                <!-- Dynamic Item Rows -->
+                            <tbody id="docItemsTableBody" class="divide-y divide-gray-100">
+                                <!-- Dynamic Rows -->
                             </tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- Row 4: Tax Type & Discount -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4 pt-2">
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">รูปแบบการชำระเงิน / ภาษี</label>
                         <select id="docTaxType" onchange="calculateDocTotals()" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
@@ -519,35 +487,34 @@
                     </div>
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">ส่วนลดท้ายบิล (บาท)</label>
-                        <input type="number" step="0.01" id="docDiscount" oninput="calculateDocTotals()" placeholder="0" value="0" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
+                        <input type="number" step="0.01" id="docDiscount" oninput="calculateDocTotals()" value="0" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
                     </div>
                 </div>
 
-                <!-- Calculation Summary Box -->
-                <div class="bg-pink-50/70 p-4 rounded-xl border border-pink-100 space-y-1.5 text-xs">
+                <!-- Grand Total Box -->
+                <div class="bg-pink-50/70 p-4 rounded-xl border border-pink-200 space-y-1.5 text-xs">
                     <div class="flex justify-between text-gray-600">
                         <span>ราคารวมสินค้า (Subtotal):</span>
-                        <span id="docSubtotalText" class="font-semibold text-gray-800">฿0.00</span>
+                        <span id="docSubtotalText" class="font-bold text-gray-800">฿0.00</span>
                     </div>
                     <div class="flex justify-between text-gray-600">
                         <span>ส่วนลด (Discount):</span>
-                        <span id="docDiscountText" class="font-semibold text-rose-600">-฿0.00</span>
+                        <span id="docDiscountText" class="font-bold text-rose-600">-฿0.00</span>
                     </div>
                     <div class="flex justify-between text-gray-600">
                         <span>ภาษีมูลค่าเพิ่ม (VAT 7%):</span>
-                        <span id="docVatText" class="font-semibold text-gray-800">฿0.00</span>
+                        <span id="docVatText" class="font-bold text-gray-800">฿0.00</span>
                     </div>
                     <div class="flex justify-between text-gray-600">
                         <span>หัก ณ ที่จ่าย (WHT):</span>
-                        <span id="docWhtText" class="font-semibold text-rose-600">-฿0.00</span>
+                        <span id="docWhtText" class="font-bold text-amber-600">-฿0.00</span>
                     </div>
-                    <div class="flex justify-between text-base font-bold text-brand-700 border-t border-pink-200 pt-2">
+                    <div class="flex justify-between text-sm font-bold text-brand-700 border-t border-pink-200 pt-2">
                         <span>ยอดชำระสุทธิ (Grand Total):</span>
-                        <span id="docTotalText">฿0.00</span>
+                        <span id="docTotalText" class="text-base">฿0.00</span>
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
                 <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
                     <button type="button" onclick="closeDocModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-xs font-semibold hover:bg-gray-100">ยกเลิก</button>
                     <button type="submit" class="px-5 py-2 pink-gradient text-white rounded-xl text-xs font-bold shadow hover:opacity-95">บันทึกเอกสาร</button>
@@ -556,9 +523,9 @@
         </div>
     </div>
 
-    <!-- Expense Modal -->
+    <!-- Modal 2: บันทึกรายจ่ายใหม่ (Exact Reference Match) -->
     <div id="expenseModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-3">
                 <h3 class="text-lg font-bold text-brand-700 flex items-center gap-2">
                     <i class="fa-solid fa-receipt"></i> บันทึกรายจ่ายใหม่
@@ -566,19 +533,20 @@
                 <button onclick="closeExpenseModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form id="expenseForm" onsubmit="saveExpense(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="expEditIndex" value="-1">
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">วันที่</label>
-                    <input type="date" id="expDate" required class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 bg-white">
+                    <input type="date" id="expDate" required class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
                 </div>
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">หมวดหมู่</label>
                     <select id="expCategory" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
                         <option value="ค่าเช่าสถานที่">ค่าเช่าสถานที่</option>
+                        <option value="ค่าสาธารณูปโภค (น้ำ-ไฟ)">ค่าสาธารณูปโภค (น้ำ-ไฟ)</option>
                         <option value="ค่าใช้จ่ายสำนักงาน">ค่าใช้จ่ายสำนักงาน</option>
-                        <option value="ค่าสาธารณูปโภค (ค่าน้ำ/ค่าไฟ)">ค่าสาธารณูปโภค (ค่าน้ำ/ค่าไฟ)</option>
-                        <option value="ค่าบริการทางวิชาชีพ / ค่าจ้างทำของ">ค่าบริการทางวิชาชีพ / ค่าจ้างทำของ</option>
-                        <option value="ค่าโฆษณาและการตลาด">ค่าโฆษณาและการตลาด</option>
-                        <option value="อื่นๆ">อื่นๆ</option>
+                        <option value="ค่าบริการทางบัญชี/กฎหมาย">ค่าบริการทางบัญชี/กฎหมาย</option>
+                        <option value="ค่าเดินทาง/ยานพาหนะ">ค่าเดินทาง/ยานพาหนะ</option>
+                        <option value="ค่าใช้จ่ายเบ็ดเตล็ด">ค่าใช้จ่ายเบ็ดเตล็ด</option>
                     </select>
                 </div>
                 <div>
@@ -586,54 +554,53 @@
                     <input type="text" id="expDesc" placeholder="ระบุรายละเอียดรายจ่าย" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
                 </div>
                 <div>
-                    <div class="flex justify-between items-center mb-1">
-                        <label class="font-bold text-gray-700">ผู้ขาย / ผู้รับเงิน</label>
-                        <button type="button" onclick="openContactModal()" class="text-brand-600 hover:underline font-bold flex items-center gap-1 text-[11px]">
-                            <i class="fa-solid fa-user-plus"></i> เพิ่มผู้ขายใหม่
-                        </button>
-                    </div>
+                    <label class="block font-bold text-gray-700 mb-1 flex justify-between">
+                        <span>ผู้ขาย / ผู้รับเงิน</span>
+                        <button type="button" onclick="openContactModal(-1, 'Vendor')" class="text-brand-600 hover:underline font-bold"><i class="fa-solid fa-user-plus"></i> เพิ่มผู้ขายใหม่</button>
+                    </label>
                     <select id="expVendorSelect" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
                         <option value="">-- ไม่ระบุผู้ขาย / ผู้รับเงิน --</option>
                     </select>
                 </div>
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">จำนวนเงิน (บาท)</label>
-                    <input type="number" step="0.01" id="expAmount" oninput="calculateExpenseTotals()" required placeholder="0.00" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 font-bold">
+                    <input type="number" step="0.01" id="expAmount" oninput="calculateExpenseTotals()" required placeholder="0.00" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
                 </div>
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">รูปแบบการชำระเงิน / ภาษี</label>
                     <select id="expTaxType" onchange="calculateExpenseTotals()" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm font-medium focus:outline-none focus:border-brand-500 bg-white">
                         <option value="none">ชำระเงินสด (ไม่มี VAT)</option>
                         <option value="vat7">รวม VAT 7%</option>
-                        <option value="wht3">หัก ณ ที่จ่าย 3% (บริการ / ค่าจ้าง)</option>
-                        <option value="wht5">หัก ณ ที่จ่าย 5% (ค่าเช่า)</option>
+                        <option value="wht3">หัก ณ ที่จ่าย 3%</option>
+                        <option value="wht5">หัก ณ ที่จ่าย 5%</option>
                     </select>
                 </div>
-                <div class="bg-pink-50/70 p-3 rounded-xl border border-pink-100 space-y-1.5 text-xs">
+                <!-- Totals Box -->
+                <div class="bg-pink-50/70 p-3 rounded-xl border border-pink-200 space-y-1 text-xs">
                     <div class="flex justify-between text-gray-600">
                         <span>จำนวนเงินก่อน VAT:</span>
-                        <span id="expSubtotalText" class="font-semibold text-gray-800">฿0.00</span>
+                        <span id="expSubtotalText" class="font-bold text-gray-800">฿0.00</span>
                     </div>
                     <div class="flex justify-between text-gray-600">
                         <span>จำนวนภาษี VAT (7%):</span>
-                        <span id="expVatText" class="font-semibold text-gray-800">฿0.00</span>
+                        <span id="expVatText" class="font-bold text-gray-800">฿0.00</span>
                     </div>
                     <div class="flex justify-between text-gray-600">
                         <span>ภาษีหัก ณ ที่จ่าย (WHT):</span>
-                        <span id="expWhtText" class="font-semibold text-rose-600">-฿0.00</span>
+                        <span id="expWhtText" class="font-bold text-rose-600">-฿0.00</span>
                     </div>
-                    <div class="flex justify-between text-sm font-bold text-brand-700 border-t border-pink-200 pt-1.5">
+                    <div class="flex justify-between text-sm font-bold text-brand-700 border-t border-pink-200 pt-1">
                         <span>ยอดชำระสุทธิ (Net Payment):</span>
                         <span id="expNetTotalText">฿0.00</span>
                     </div>
                 </div>
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">แนบไฟล์เอกสาร (PDF หรือรูปภาพ)</label>
-                    <div class="flex items-center gap-2 border border-gray-200 rounded-xl p-1.5 bg-gray-50 text-xs">
-                        <label class="bg-white border border-gray-300 px-3 py-1.5 rounded-lg cursor-pointer font-semibold text-gray-700 hover:bg-gray-100">
-                            เลือกไฟล์ <input type="file" id="expFile" class="hidden">
+                    <div class="flex items-center gap-2 border border-gray-200 rounded-xl p-1.5 bg-gray-50">
+                        <label class="bg-white border border-gray-300 px-3 py-1 rounded-lg cursor-pointer font-semibold text-gray-700 hover:bg-gray-100 text-xs">
+                            เลือกไฟล์ <input type="file" id="expFile" onchange="handleFileSelect(this, 'expFileName')" class="hidden" accept="image/*,.pdf">
                         </label>
-                        <span class="text-gray-400 text-[11px] truncate">ไม่ได้เลือกไฟล์ใด</span>
+                        <span id="expFileName" class="text-gray-400 text-xs truncate">ไม่ได้เลือกไฟล์ใด</span>
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
@@ -644,22 +611,23 @@
         </div>
     </div>
 
-    <!-- Product Modal -->
+    <!-- Modal 3: สินค้าและบริการ -->
     <div id="productModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 space-y-4 shadow-2xl">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                <h3 id="productModalTitle" class="text-lg font-bold text-brand-700 flex items-center gap-2">
                     <i class="fa-solid fa-box text-brand-600"></i> เพิ่มสินค้าใหม่
                 </h3>
                 <button onclick="closeProductModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form id="productForm" onsubmit="saveProduct(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="prodEditIndex" value="-1">
                 <div>
-                    <label class="block font-bold text-gray-700 mb-1">รหัสสินค้า</label>
-                    <input type="text" id="prodCode" required placeholder="เช่น P001" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+                    <label class="block font-bold text-gray-700 mb-1">รหัสสินค้า <span class="text-rose-500">*</span></label>
+                    <input type="text" id="prodCode" required placeholder="เช่น P003" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
                 </div>
                 <div>
-                    <label class="block font-bold text-gray-700 mb-1">ชื่อสินค้า / รายการ</label>
+                    <label class="block font-bold text-gray-700 mb-1">ชื่อสินค้า / รายการ <span class="text-rose-500">*</span></label>
                     <input type="text" id="prodName" required placeholder="ระบุชื่อสินค้า" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
                 </div>
                 <div class="grid grid-cols-2 gap-2">
@@ -673,27 +641,28 @@
                     </div>
                 </div>
                 <div>
-                    <label class="block font-bold text-gray-700 mb-1">จำนวนสต็อกเริ่มต้น</label>
-                    <input type="number" id="prodStock" required placeholder="0" value="10" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
+                    <label class="block font-bold text-gray-700 mb-1">คงเหลือในสต็อก</label>
+                    <input type="number" id="prodStock" required placeholder="0" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
                 </div>
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeProductModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-sm font-semibold hover:bg-gray-100">ยกเลิก</button>
-                    <button type="submit" class="px-5 py-2 pink-gradient text-white rounded-xl text-sm font-bold shadow hover:opacity-95">บันทึก</button>
+                <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
+                    <button type="button" onclick="closeProductModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-xs font-semibold hover:bg-gray-100">ยกเลิก</button>
+                    <button type="submit" class="px-5 py-2 pink-gradient text-white rounded-xl text-xs font-bold shadow hover:opacity-95">บันทึก</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Contact Modal (Exact Reference Match) -->
+    <!-- Modal 4: เพิ่มผู้ติดต่อ (Exact Reference Match) -->
     <div id="contactModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-lg font-bold text-brand-700 flex items-center gap-2">
+                <h3 id="contactModalTitle" class="text-lg font-bold text-brand-700 flex items-center gap-2">
                     <i class="fa-solid fa-user-plus"></i> เพิ่มผู้ติดต่อ
                 </h3>
                 <button onclick="closeContactModal()" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <form id="contactForm" onsubmit="saveContact(event)" class="space-y-3 text-xs">
+                <input type="hidden" id="contEditIndex" value="-1">
                 <div>
                     <label class="block font-bold text-gray-700 mb-1">ชื่อบริษัท / ผู้ติดต่อ <span class="text-rose-500">*</span></label>
                     <input type="text" id="contName" required placeholder="ระบุชื่อบริษัทหรือบุคคล" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
@@ -728,18 +697,18 @@
                         <label class="block font-bold text-brand-700 mb-1 flex items-center gap-1"><i class="fa-solid fa-signature"></i> ซิกเนเจอร์ / ลายเซ็น</label>
                         <div class="flex items-center gap-1 border border-gray-200 rounded-xl p-1 bg-gray-50">
                             <label class="bg-white border border-gray-300 px-2.5 py-1 rounded-lg cursor-pointer font-semibold text-gray-700 hover:bg-gray-100 text-[11px]">
-                                เลือกไฟล์ <input type="file" class="hidden">
+                                เลือกไฟล์ <input type="file" id="contSigFile" onchange="handleFileSelect(this, 'contSigName')" class="hidden" accept="image/*">
                             </label>
-                            <span class="text-gray-400 text-[10px] truncate">ไม่ได้เลือกไฟล์ใด</span>
+                            <span id="contSigName" class="text-gray-400 text-[10px] truncate">ไม่ได้เลือกไฟล์ใด</span>
                         </div>
                     </div>
                     <div>
                         <label class="block font-bold text-brand-700 mb-1 flex items-center gap-1"><i class="fa-solid fa-stamp"></i> รูปตราประทับ</label>
                         <div class="flex items-center gap-1 border border-gray-200 rounded-xl p-1 bg-gray-50">
                             <label class="bg-white border border-gray-300 px-2.5 py-1 rounded-lg cursor-pointer font-semibold text-gray-700 hover:bg-gray-100 text-[11px]">
-                                เลือกไฟล์ <input type="file" class="hidden">
+                                เลือกไฟล์ <input type="file" id="contStampFile" onchange="handleFileSelect(this, 'contStampName')" class="hidden" accept="image/*">
                             </label>
-                            <span class="text-gray-400 text-[10px] truncate">ไม่ได้เลือกไฟล์ใด</span>
+                            <span id="contStampName" class="text-gray-400 text-[10px] truncate">ไม่ได้เลือกไฟล์ใด</span>
                         </div>
                     </div>
                 </div>
@@ -751,7 +720,7 @@
         </div>
     </div>
 
-    <!-- JavaScript Logic -->
+    <!-- Application JavaScript Logic -->
     <script>
         let appData = {
             documents: [],
@@ -761,9 +730,9 @@
                 { code: 'P002', name: 'ให้คำปรึกษาภาษีอากร (ชั่วโมงละ)', cost: 1000, price: 2500, stock: 100 }
             ],
             contacts: [
-                { name: 'บริษัท เอสบีไอ อินเตอร์เนชั่นแนล จำกัด', taxId: '0105558887771', address: '129/1 อาคารสาทรซิตี้ทาวเวอร์ กรุงเทพฯ', phone: '02-555-1234', email: 'contact@sbi.co.th', type: 'Customer' },
-                { name: 'บริษัท เอ็มแอนด์อาร์ อีออคทริค2 จำกัด', taxId: '0105559998881', address: '45/2 ถนนสุขุมวิท กรุงเทพฯ', phone: '02-888-9999', email: 'mr@electric.co.th', type: 'Vendor' },
-                { name: 'การไฟฟ้าส่วนภูมิภาค เขต2 (ภาคเหนือ)', taxId: '0994000165511', address: 'เชียงใหม่', phone: '053-111-222', email: 'pea@pea.co.th', type: 'Customer' }
+                { name: 'บริษัท เอสบีไอ อินเตอร์เนชั่นแนล จำกัด', taxId: '0105558887771', address: '129/1 อาคารสาทรซิตี้ทาวเวอร์ กรุงเทพฯ', phone: '02-555-1234', email: 'contact@sbi.co.th', type: 'Customer', sig: '', stamp: '' },
+                { name: 'บริษัท เอ็มแอนด์อาร์ อีออคทริค2 จำกัด', taxId: '0105559998881', address: '45/2 ถนนสุขุมวิท กรุงเทพฯ', phone: '02-888-9999', email: 'mr@electric.co.th', type: 'Vendor', sig: '', stamp: '' },
+                { name: 'การไฟฟ้าส่วนภูมิภาค เขต2 (ภาคเหนือ)', taxId: '0994000165511', address: 'เชียงใหม่', phone: '053-111-222', email: 'pea@pea.co.th', type: 'Customer', sig: '', stamp: '' }
             ]
         };
 
@@ -805,72 +774,112 @@
             });
         }
 
-        // Modals Open/Close
-        function openNewDocModal() {
-            document.getElementById('docId').value = 'INV-2026-' + Math.floor(100 + Math.random() * 900);
-            document.getElementById('docDate').valueAsDate = new Date();
+        function handleFileSelect(input, labelId) {
+            const label = document.getElementById(labelId);
+            if (label && input.files && input.files[0]) {
+                label.innerText = input.files[0].name;
+            } else if (label) {
+                label.innerText = 'ไม่ได้เลือกไฟล์ใด';
+            }
+        }
+
+        // Modals Open / Close / Edit Handlers
+        function openNewDocModal(editIndex = -1) {
+            const form = document.getElementById('docForm');
+            if (form) form.reset();
             populateDocDropdowns();
-            document.getElementById('docItemsTableBody').innerHTML = '';
-            addDocItemRow();
+            const itemsBody = document.getElementById('docItemsTableBody');
+            if (itemsBody) itemsBody.innerHTML = '';
+
+            if (editIndex >= 0) {
+                const d = appData.documents[editIndex];
+                document.getElementById('docEditIndex').value = editIndex;
+                document.getElementById('docType').value = d.type;
+                document.getElementById('docId').value = d.id;
+                document.getElementById('docIssuerSelect').value = d.issuer || '';
+                document.getElementById('docCustomerSelect').value = d.customer;
+                document.getElementById('docDate').value = d.date;
+                document.getElementById('docStatus').value = d.status;
+                document.getElementById('docTaxType').value = d.taxType || 'vat7';
+                document.getElementById('docDiscount').value = d.discount || 0;
+
+                if (d.items && d.items.length > 0) {
+                    d.items.forEach(item => addDocItemRow(item));
+                } else {
+                    addDocItemRow();
+                }
+            } else {
+                document.getElementById('docEditIndex').value = '-1';
+                handleDocTypeChange();
+                document.getElementById('docDate').valueAsDate = new Date();
+                addDocItemRow();
+            }
+            calculateDocTotals();
             document.getElementById('docModal').classList.remove('hidden');
         }
         function closeDocModal() { document.getElementById('docModal').classList.add('hidden'); }
 
-        function openNewExpenseModal() {
-            document.getElementById('expDate').valueAsDate = new Date();
-            populateExpenseVendors();
-            document.getElementById('expenseModal').classList.remove('hidden');
+        function handleDocTypeChange() {
+            const editIndex = parseInt(document.getElementById('docEditIndex').value);
+            if (editIndex >= 0) return;
+            const docType = document.getElementById('docType').value;
+            let prefix = 'INV-';
+            if (docType.includes('Quotation')) prefix = 'QT-';
+            else if (docType.includes('Receipt')) prefix = 'REC-';
+            document.getElementById('docId').value = prefix + '2026-' + Math.floor(100 + Math.random() * 900);
         }
-        function closeExpenseModal() { document.getElementById('expenseModal').classList.add('hidden'); }
-
-        function openProductModal() {
-            document.getElementById('productForm').reset();
-            document.getElementById('productModal').classList.remove('hidden');
-        }
-        function closeProductModal() { document.getElementById('productModal').classList.add('hidden'); }
-
-        function openContactModal() {
-            document.getElementById('contactForm').reset();
-            document.getElementById('contactModal').classList.remove('hidden');
-        }
-        function closeContactModal() { document.getElementById('contactModal').classList.add('hidden'); }
 
         function populateDocDropdowns() {
-            const custSelect = document.getElementById('docCustomerSelect');
-            const customers = appData.contacts.filter(c => c.type === 'Customer');
-            custSelect.innerHTML = `<option value="">-- เลือกข้อมูลลูกค้า --</option>` +
-                customers.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
-
             const issuerSelect = document.getElementById('docIssuerSelect');
-            const vendors = appData.contacts.filter(c => c.type === 'Vendor');
-            issuerSelect.innerHTML = `<option value="">-- เลือกผู้ออกเอกสาร --</option>` +
-                (vendors.length > 0 ? vendors.map(v => `<option value="${v.name}">${v.name}</option>`).join('') : `<option value="บริษัท ทีเคพี จำกัด">บริษัท ทีเคพี จำกัด</option>`);
+            const customerSelect = document.getElementById('docCustomerSelect');
+            if (issuerSelect) {
+                issuerSelect.innerHTML = '<option value="">-- เลือกผู้ออกเอกสาร --</option>';
+                appData.contacts.filter(c => c.type === 'Vendor').forEach(v => {
+                    issuerSelect.innerHTML += `<option value="${v.name}">${v.name}</option>`;
+                });
+            }
+            if (customerSelect) {
+                customerSelect.innerHTML = '<option value="">-- เลือกข้อมูลลูกค้า --</option>';
+                appData.contacts.filter(c => c.type === 'Customer').forEach(c => {
+                    customerSelect.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+                });
+            }
         }
 
-        function addDocItemRow() {
+        function addDocItemRow(itemData = null) {
             const tbody = document.getElementById('docItemsTableBody');
-            const rowIdx = tbody.children.length;
+            if (!tbody) return;
             const tr = document.createElement('tr');
-            tr.className = "hover:bg-gray-100/50";
+            tr.className = "doc-item-row";
+
+            let productOptions = `<option value="">-- เลือกจากคลัง --</option>`;
+            appData.products.forEach(p => {
+                const selected = itemData && itemData.code === p.code ? 'selected' : '';
+                productOptions += `<option value="${p.code}" data-name="${p.name}" data-price="${p.price}" ${selected}>${p.code}</option>`;
+            });
+
+            const nameVal = itemData ? itemData.name : '';
+            const qtyVal = itemData ? itemData.qty : 1;
+            const priceVal = itemData ? itemData.price : 0;
+
             tr.innerHTML = `
                 <td class="p-2">
-                    <select onchange="handleDocItemSelect(this)" class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-500 item-code-select">
-                        <option value="">-- เลือกจากคลัง --</option>
-                        ${appData.products.map(p => `<option value="${p.code}" data-price="${p.price}" data-name="${p.name}">${p.code} - ${p.name}</option>`).join('')}
+                    <select onchange="handleDocItemSelect(this)" class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-500">
+                        ${productOptions}
                     </select>
                 </td>
                 <td class="p-2">
-                    <input type="text" placeholder="ชื่อสินค้าหรือรายละเอียด" class="w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs bg-white focus:outline-none focus:border-brand-500 item-name-input">
+                    <input type="text" class="item-name w-full px-2.5 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:border-brand-500" placeholder="ชื่อสินค้าหรือรายละเอียด" value="${nameVal}" required>
                 </td>
+                <td class="p-2">
+                    <input type="number" class="item-qty w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs text-center focus:outline-none focus:border-brand-500" value="${qtyVal}" min="1" oninput="calculateDocTotals()" required>
+                </td>
+                <td class="p-2">
+                    <input type="number" step="0.01" class="item-price w-full px-2 py-1.5 border border-gray-200 rounded-lg text-xs text-right focus:outline-none focus:border-brand-500" value="${priceVal}" oninput="calculateDocTotals()" required>
+                </td>
+                <td class="p-2 text-right font-bold text-gray-800 item-total">฿0.00</td>
                 <td class="p-2 text-center">
-                    <input type="number" min="1" value="1" oninput="calculateDocTotals()" class="w-16 px-2 py-1.5 border border-gray-200 rounded-lg text-xs text-center bg-white focus:outline-none focus:border-brand-500 item-qty-input">
-                </td>
-                <td class="p-2 text-right">
-                    <input type="number" step="0.01" value="0" oninput="calculateDocTotals()" class="w-24 px-2 py-1.5 border border-gray-200 rounded-lg text-xs text-right bg-white focus:outline-none focus:border-brand-500 item-price-input">
-                </td>
-                <td class="p-2 text-right font-bold item-row-total text-gray-800">฿0.00</td>
-                <td class="p-2 text-center">
-                    <button type="button" onclick="this.closest('tr').remove(); calculateDocTotals();" class="text-red-500 hover:text-red-700 font-bold"><i class="fa-solid fa-trash"></i></button>
+                    <button type="button" onclick="removeDocItemRow(this)" class="text-rose-500 hover:text-rose-700 p-1"><i class="fa-solid fa-trash-can"></i></button>
                 </td>
             `;
             tbody.appendChild(tr);
@@ -878,333 +887,536 @@
         }
 
         function handleDocItemSelect(selectElem) {
-            const row = selectElem.closest('tr');
-            const selectedOpt = selectElem.options[selectElem.selectedIndex];
-            const price = selectedOpt.getAttribute('data-price') || 0;
-            const name = selectedOpt.getAttribute('data-name') || '';
-
-            row.querySelector('.item-name-input').value = name;
-            row.querySelector('.item-price-input').value = price;
+            const option = selectElem.options[selectElem.selectedIndex];
+            const tr = selectElem.closest('tr');
+            if (!tr) return;
+            const nameInput = tr.querySelector('.item-name');
+            const priceInput = tr.querySelector('.item-price');
+            if (option && option.value) {
+                nameInput.value = option.getAttribute('data-name') || '';
+                priceInput.value = parseFloat(option.getAttribute('data-price')) || 0;
+            }
             calculateDocTotals();
         }
 
-        function calculateDocTotals() {
-            const rows = document.querySelectorAll('#docItemsTableBody tr');
-            let subtotal = 0;
+        function removeDocItemRow(btn) {
+            const tbody = document.getElementById('docItemsTableBody');
+            if (tbody && tbody.querySelectorAll('tr').length > 1) {
+                btn.closest('tr').remove();
+                calculateDocTotals();
+            }
+        }
 
-            rows.forEach(row => {
-                const qty = parseFloat(row.querySelector('.item-qty-input')?.value) || 0;
-                const price = parseFloat(row.querySelector('.item-price-input')?.value) || 0;
+        function calculateDocTotals() {
+            let subtotal = 0;
+            document.querySelectorAll('#docItemsTableBody .doc-item-row').forEach(tr => {
+                const qty = parseFloat(tr.querySelector('.item-qty')?.value) || 0;
+                const price = parseFloat(tr.querySelector('.item-price')?.value) || 0;
                 const rowTotal = qty * price;
-                row.querySelector('.item-row-total').innerText = '฿' + rowTotal.toFixed(2);
                 subtotal += rowTotal;
+                const totalCell = tr.querySelector('.item-total');
+                if (totalCell) totalCell.innerText = '฿' + rowTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             });
 
-            const discount = parseFloat(document.getElementById('docDiscount').value) || 0;
-            const netSubtotal = Math.max(0, subtotal - discount);
-            const taxType = document.getElementById('docTaxType').value;
-            
+            const discount = parseFloat(document.getElementById('docDiscount')?.value) || 0;
+            const netBase = Math.max(0, subtotal - discount);
+            const taxType = document.getElementById('docTaxType')?.value || 'vat7';
+
             let vat = 0;
             let wht = 0;
-            let grandTotal = netSubtotal;
-
             if (taxType === 'vat7') {
-                vat = netSubtotal * 0.07;
-                grandTotal = netSubtotal + vat;
+                vat = netBase * 0.07;
             } else if (taxType === 'vat7_wht3') {
-                vat = netSubtotal * 0.07;
-                wht = netSubtotal * 0.03;
-                grandTotal = netSubtotal + vat - wht;
+                vat = netBase * 0.07;
+                wht = netBase * 0.03;
             } else if (taxType === 'vat7_wht5') {
-                vat = netSubtotal * 0.07;
-                wht = netSubtotal * 0.05;
-                grandTotal = netSubtotal + vat - wht;
+                vat = netBase * 0.07;
+                wht = netBase * 0.05;
             } else if (taxType === 'wht3') {
-                wht = netSubtotal * 0.03;
-                grandTotal = netSubtotal - wht;
+                wht = netBase * 0.03;
             }
 
-            document.getElementById('docSubtotalText').innerText = '฿' + subtotal.toFixed(2);
-            document.getElementById('docDiscountText').innerText = '-฿' + discount.toFixed(2);
-            document.getElementById('docVatText').innerText = '฿' + vat.toFixed(2);
-            document.getElementById('docWhtText').innerText = '-฿' + wht.toFixed(2);
-            document.getElementById('docTotalText').innerText = '฿' + grandTotal.toFixed(2);
+            const grandTotal = netBase + vat - wht;
+
+            if (document.getElementById('docSubtotalText')) document.getElementById('docSubtotalText').innerText = '฿' + subtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (document.getElementById('docDiscountText')) document.getElementById('docDiscountText').innerText = '-฿' + discount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (document.getElementById('docVatText')) document.getElementById('docVatText').innerText = '฿' + vat.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (document.getElementById('docWhtText')) document.getElementById('docWhtText').innerText = '-฿' + wht.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (document.getElementById('docTotalText')) document.getElementById('docTotalText').innerText = '฿' + grandTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         function saveDocument(e) {
             e.preventDefault();
-            const rows = document.querySelectorAll('#docItemsTableBody tr');
+            const editIndex = parseInt(document.getElementById('docEditIndex').value);
+            const items = [];
             let subtotal = 0;
-            rows.forEach(row => {
-                const qty = parseFloat(row.querySelector('.item-qty-input')?.value) || 0;
-                const price = parseFloat(row.querySelector('.item-price-input')?.value) || 0;
-                subtotal += (qty * price);
+
+            document.querySelectorAll('#docItemsTableBody .doc-item-row').forEach(tr => {
+                const code = tr.querySelector('select')?.value || '';
+                const name = tr.querySelector('.item-name')?.value || '';
+                const qty = parseFloat(tr.querySelector('.item-qty')?.value) || 0;
+                const price = parseFloat(tr.querySelector('.item-price')?.value) || 0;
+                subtotal += qty * price;
+                items.push({ code, name, qty, price });
             });
 
-            const discount = parseFloat(document.getElementById('docDiscount').value) || 0;
-            const netSub = Math.max(0, subtotal - discount);
-            const taxType = document.getElementById('docTaxType').value;
+            const discount = parseFloat(document.getElementById('docDiscount')?.value) || 0;
+            const netBase = Math.max(0, subtotal - discount);
+            const taxType = document.getElementById('docTaxType')?.value || 'vat7';
+
             let vat = 0;
             let wht = 0;
-            if (taxType === 'vat7') {
-                vat = netSub * 0.07;
-            } else if (taxType === 'vat7_wht3') {
-                vat = netSub * 0.07;
-                wht = netSub * 0.03;
-            } else if (taxType === 'vat7_wht5') {
-                vat = netSub * 0.07;
-                wht = netSub * 0.05;
-            } else if (taxType === 'wht3') {
-                wht = netSub * 0.03;
-            }
-            let grandTotal = netSub + vat - wht;
+            if (taxType === 'vat7') vat = netBase * 0.07;
+            else if (taxType === 'vat7_wht3') { vat = netBase * 0.07; wht = netBase * 0.03; }
+            else if (taxType === 'vat7_wht5') { vat = netBase * 0.07; wht = netBase * 0.05; }
+            else if (taxType === 'wht3') wht = netBase * 0.03;
 
-            const newDoc = {
-                id: document.getElementById('docId').value,
+            const grandTotal = netBase + vat - wht;
+
+            const docObj = {
                 type: document.getElementById('docType').value,
-                date: document.getElementById('docDate').value,
+                id: document.getElementById('docId').value,
+                issuer: document.getElementById('docIssuerSelect').value,
                 customer: document.getElementById('docCustomerSelect').value || 'ลูกค้าทั่วไป',
-                subtotal: netSub,
-                vat: vat,
+                date: document.getElementById('docDate').value,
+                status: document.getElementById('docStatus').value,
+                taxType,
+                discount,
+                subtotal: netBase,
+                vat,
+                wht,
                 total: grandTotal,
-                status: document.getElementById('docStatus').value
+                items
             };
-            appData.documents.push(newDoc);
+
+            if (editIndex >= 0) {
+                appData.documents[editIndex] = docObj;
+            } else {
+                appData.documents.unshift(docObj);
+            }
+
             closeDocModal();
             renderDocumentsTable();
             updateDashboard();
         }
 
-        function populateExpenseVendors() {
-            const select = document.getElementById('expVendorSelect');
-            const vendors = appData.contacts.filter(c => c.type === 'Vendor');
-            select.innerHTML = `<option value="">-- ไม่ระบุผู้ขาย / ผู้รับเงิน --</option>` +
-                vendors.map(v => `<option value="${v.name}">${v.name}</option>`).join('');
+        function deleteDocument(index) {
+            appData.documents.splice(index, 1);
+            renderDocumentsTable();
+            updateDashboard();
         }
 
+        // Expense Modal & Handlers
+        function populateExpenseVendors() {
+            const select = document.getElementById('expVendorSelect');
+            if (!select) return;
+            select.innerHTML = '<option value="">-- ไม่ระบุผู้ขาย / ผู้รับเงิน --</option>';
+            appData.contacts.filter(c => c.type === 'Vendor').forEach(v => {
+                select.innerHTML += `<option value="${v.name}">${v.name}</option>`;
+            });
+        }
+
+        function openNewExpenseModal(editIndex = -1) {
+            const form = document.getElementById('expenseForm');
+            if (form) form.reset();
+            populateExpenseVendors();
+            const fileLabel = document.getElementById('expFileName');
+            if (fileLabel) fileLabel.innerText = 'ไม่ได้เลือกไฟล์ใด';
+
+            if (editIndex >= 0) {
+                const exp = appData.expenses[editIndex];
+                document.getElementById('expEditIndex').value = editIndex;
+                document.getElementById('expDate').value = exp.date;
+                document.getElementById('expCategory').value = exp.category;
+                document.getElementById('expDesc').value = exp.desc;
+                document.getElementById('expVendorSelect').value = exp.vendor || '';
+                document.getElementById('expAmount').value = exp.amount;
+                document.getElementById('expTaxType').value = exp.taxType || 'none';
+                if (exp.fileName && fileLabel) fileLabel.innerText = exp.fileName;
+            } else {
+                document.getElementById('expEditIndex').value = '-1';
+                document.getElementById('expDate').valueAsDate = new Date();
+            }
+            calculateExpenseTotals();
+            document.getElementById('expenseModal').classList.remove('hidden');
+        }
+        function closeExpenseModal() { document.getElementById('expenseModal').classList.add('hidden'); }
+
         function calculateExpenseTotals() {
-            const amount = parseFloat(document.getElementById('expAmount').value) || 0;
-            const taxType = document.getElementById('expTaxType').value;
-            let subtotal = amount;
+            const amount = parseFloat(document.getElementById('expAmount')?.value) || 0;
+            const taxType = document.getElementById('expTaxType')?.value || 'none';
             let vat = 0;
             let wht = 0;
-            let netTotal = amount;
+            if (taxType === 'vat7') vat = amount * 0.07;
+            else if (taxType === 'wht3') wht = amount * 0.03;
+            else if (taxType === 'wht5') wht = amount * 0.05;
 
-            if (taxType === 'vat7') {
-                subtotal = amount / 1.07;
-                vat = amount - subtotal;
-                netTotal = amount;
-            } else if (taxType === 'wht3') {
-                wht = amount * 0.03;
-                netTotal = amount - wht;
-            } else if (taxType === 'wht5') {
-                wht = amount * 0.05;
-                netTotal = amount - wht;
-            }
-
-            document.getElementById('expSubtotalText').innerText = '฿' + subtotal.toFixed(2);
-            document.getElementById('expVatText').innerText = '฿' + vat.toFixed(2);
-            document.getElementById('expWhtText').innerText = '-฿' + wht.toFixed(2);
-            document.getElementById('expNetTotalText').innerText = '฿' + netTotal.toFixed(2);
+            const netTotal = amount + vat - wht;
+            if (document.getElementById('expSubtotalText')) document.getElementById('expSubtotalText').innerText = '฿' + amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (document.getElementById('expVatText')) document.getElementById('expVatText').innerText = '฿' + vat.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (document.getElementById('expWhtText')) document.getElementById('expWhtText').innerText = '-฿' + wht.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            if (document.getElementById('expNetTotalText')) document.getElementById('expNetTotalText').innerText = '฿' + netTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         function saveExpense(e) {
             e.preventDefault();
+            const editIndex = parseInt(document.getElementById('expEditIndex').value);
             const amount = parseFloat(document.getElementById('expAmount').value) || 0;
             const taxType = document.getElementById('expTaxType').value;
-            let netTotal = amount;
-            if (taxType === 'wht3') netTotal = amount - (amount * 0.03);
-            if (taxType === 'wht5') netTotal = amount - (amount * 0.05);
+            let vat = 0;
+            let wht = 0;
+            if (taxType === 'vat7') vat = amount * 0.07;
+            else if (taxType === 'wht3') wht = amount * 0.03;
+            else if (taxType === 'wht5') wht = amount * 0.05;
 
-            const newExp = {
+            const fileLabel = document.getElementById('expFileName');
+            const fileName = fileLabel && fileLabel.innerText !== 'ไม่ได้เลือกไฟล์ใด' ? fileLabel.innerText : '';
+
+            const expObj = {
                 date: document.getElementById('expDate').value,
                 category: document.getElementById('expCategory').value,
-                description: document.getElementById('expDesc').value,
+                desc: document.getElementById('expDesc').value || '-',
                 vendor: document.getElementById('expVendorSelect').value || '-',
-                amount: netTotal
+                amount,
+                taxType,
+                vat,
+                wht,
+                netTotal: amount + vat - wht,
+                fileName
             };
-            appData.expenses.push(newExp);
+
+            if (editIndex >= 0) {
+                appData.expenses[editIndex] = expObj;
+            } else {
+                appData.expenses.unshift(expObj);
+            }
+
             closeExpenseModal();
             renderExpensesTable();
             updateDashboard();
         }
 
+        function deleteExpense(index) {
+            appData.expenses.splice(index, 1);
+            renderExpensesTable();
+            updateDashboard();
+        }
+
+        // Product Modal & Handlers
+        function openProductModal(editIndex = -1) {
+            const form = document.getElementById('productForm');
+            if (form) form.reset();
+            if (editIndex >= 0) {
+                const p = appData.products[editIndex];
+                document.getElementById('prodEditIndex').value = editIndex;
+                document.getElementById('prodCode').value = p.code;
+                document.getElementById('prodName').value = p.name;
+                document.getElementById('prodCost').value = p.cost;
+                document.getElementById('prodPrice').value = p.price;
+                document.getElementById('prodStock').value = p.stock;
+                document.getElementById('productModalTitle').innerHTML = `<i class="fa-solid fa-pen-to-square text-brand-600"></i> แก้ไขสินค้า`;
+            } else {
+                document.getElementById('prodEditIndex').value = '-1';
+                document.getElementById('productModalTitle').innerHTML = `<i class="fa-solid fa-box text-brand-600"></i> เพิ่มสินค้าใหม่`;
+            }
+            document.getElementById('productModal').classList.remove('hidden');
+        }
+        function closeProductModal() { document.getElementById('productModal').classList.add('hidden'); }
+
         function saveProduct(e) {
             e.preventDefault();
-            const newProd = {
+            const editIndex = parseInt(document.getElementById('prodEditIndex').value);
+            const prodObj = {
                 code: document.getElementById('prodCode').value,
                 name: document.getElementById('prodName').value,
                 cost: parseFloat(document.getElementById('prodCost').value) || 0,
                 price: parseFloat(document.getElementById('prodPrice').value) || 0,
                 stock: parseInt(document.getElementById('prodStock').value) || 0
             };
-            appData.products.push(newProd);
+            if (editIndex >= 0) {
+                appData.products[editIndex] = prodObj;
+            } else {
+                appData.products.push(prodObj);
+            }
             closeProductModal();
             renderProductsTable();
         }
 
+        function deleteProduct(index) {
+            appData.products.splice(index, 1);
+            renderProductsTable();
+        }
+
+        // Contact Modal & Handlers
+        function openContactModal(editIndex = -1, defaultType = 'Customer') {
+            const form = document.getElementById('contactForm');
+            if (form) form.reset();
+            const sigLabel = document.getElementById('contSigName');
+            const stampLabel = document.getElementById('contStampName');
+            if (sigLabel) sigLabel.innerText = 'ไม่ได้เลือกไฟล์ใด';
+            if (stampLabel) stampLabel.innerText = 'ไม่ได้เลือกไฟล์ใด';
+
+            if (editIndex >= 0) {
+                const c = appData.contacts[editIndex];
+                document.getElementById('contEditIndex').value = editIndex;
+                document.getElementById('contName').value = c.name;
+                document.getElementById('contTaxId').value = c.taxId || '';
+                document.getElementById('contAddress').value = c.address || '';
+                document.getElementById('contPhone').value = c.phone || '';
+                document.getElementById('contType').value = c.type || 'Customer';
+                document.getElementById('contEmail').value = c.email || '';
+                if (c.sig && sigLabel) sigLabel.innerText = c.sig;
+                if (c.stamp && stampLabel) stampLabel.innerText = c.stamp;
+                document.getElementById('contactModalTitle').innerHTML = `<i class="fa-solid fa-user-pen"></i> แก้ไขผู้ติดต่อ`;
+            } else {
+                document.getElementById('contEditIndex').value = '-1';
+                document.getElementById('contType').value = defaultType;
+                document.getElementById('contactModalTitle').innerHTML = `<i class="fa-solid fa-user-plus"></i> เพิ่มผู้ติดต่อ`;
+            }
+            document.getElementById('contactModal').classList.remove('hidden');
+        }
+
+        function closeContactModal() {
+            document.getElementById('contactModal').classList.add('hidden');
+        }
+
         function saveContact(e) {
             e.preventDefault();
-            const newCont = {
+            const editIndex = parseInt(document.getElementById('contEditIndex').value);
+            const sigLabel = document.getElementById('contSigName');
+            const stampLabel = document.getElementById('contStampName');
+
+            const contData = {
                 name: document.getElementById('contName').value,
                 taxId: document.getElementById('contTaxId').value || '-',
                 address: document.getElementById('contAddress').value || '-',
                 phone: document.getElementById('contPhone').value || '-',
+                type: document.getElementById('contType').value,
                 email: document.getElementById('contEmail').value || '-',
-                type: document.getElementById('contType').value
+                sig: sigLabel && sigLabel.innerText !== 'ไม่ได้เลือกไฟล์ใด' ? sigLabel.innerText : '',
+                stamp: stampLabel && stampLabel.innerText !== 'ไม่ได้เลือกไฟล์ใด' ? stampLabel.innerText : ''
             };
-            appData.contacts.push(newCont);
+
+            const prevIssuer = document.getElementById('docIssuerSelect')?.value;
+            const prevCustomer = document.getElementById('docCustomerSelect')?.value;
+
+            if (editIndex >= 0) {
+                appData.contacts[editIndex] = contData;
+            } else {
+                appData.contacts.push(contData);
+            }
+
             closeContactModal();
+            renderContactsTable();
+            populateDocDropdowns();
+            populateExpenseVendors();
+
+            if (editIndex < 0) {
+                if (contData.type === 'Vendor') {
+                    if (document.getElementById('docIssuerSelect')) document.getElementById('docIssuerSelect').value = contData.name;
+                    if (document.getElementById('docCustomerSelect') && prevCustomer) document.getElementById('docCustomerSelect').value = prevCustomer;
+                    if (document.getElementById('expVendorSelect')) document.getElementById('expVendorSelect').value = contData.name;
+                } else {
+                    if (document.getElementById('docCustomerSelect')) document.getElementById('docCustomerSelect').value = contData.name;
+                    if (document.getElementById('docIssuerSelect') && prevIssuer) document.getElementById('docIssuerSelect').value = prevIssuer;
+                }
+            }
+        }
+
+        function deleteContact(index) {
+            appData.contacts.splice(index, 1);
             renderContactsTable();
         }
 
+        // Render Tables & Dashboard
         function renderDocumentsTable() {
             const tbody = document.getElementById('documentsTable');
-            const keyword = (document.getElementById('searchDocumentsInput')?.value || '').toLowerCase();
-            const filtered = appData.documents.filter(d => d.id.toLowerCase().includes(keyword) || d.customer.toLowerCase().includes(keyword));
+            if (!tbody) return;
+            const search = (document.getElementById('searchDocumentsInput')?.value || '').toLowerCase();
+            const filtered = appData.documents.filter(d => d.id.toLowerCase().includes(search) || d.customer.toLowerCase().includes(search));
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-gray-400">ยังไม่มีรายการเอกสารการขาย</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">ยังไม่มีรายการเอกสารการขาย</td></tr>`;
                 return;
             }
-            tbody.innerHTML = filtered.map((d, index) => `
-                <tr class="hover:bg-pink-50/50">
-                    <td class="p-4"><span class="px-2 py-1 bg-pink-50 text-brand-700 rounded-lg text-xs font-bold">ใบแจ้งหนี้</span></td>
-                    <td class="p-4 font-mono font-bold text-gray-900">${d.id}</td>
-                    <td class="p-4">${d.date}</td>
-                    <td class="p-4 font-semibold">${d.customer}</td>
-                    <td class="p-4 text-right font-bold text-gray-800">฿${d.total.toFixed(2)}</td>
-                    <td class="p-4 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${d.status === 'Paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${d.status === 'Paid' ? 'ชำระแล้ว' : 'รอชำระ'}</span></td>
-                    <td class="p-4 text-center"><button onclick="deleteDoc(${index})" class="text-red-500 hover:text-red-700 text-xs font-bold"><i class="fa-solid fa-trash"></i> ลบ</button></td>
-                </tr>
-            `).join('');
+
+            tbody.innerHTML = filtered.map((d, idx) => {
+                const origIdx = appData.documents.indexOf(d);
+                const statusBadge = d.status === 'Paid'
+                    ? `<span class="bg-emerald-50 text-emerald-600 px-2.5 py-1 rounded-full text-xs font-bold">ชำระแล้ว</span>`
+                    : `<span class="bg-amber-50 text-amber-600 px-2.5 py-1 rounded-full text-xs font-bold">รอชำระ</span>`;
+                return `
+                    <tr class="hover:bg-pink-50/30 transition">
+                        <td class="p-4 text-xs font-semibold text-gray-600">${d.type}</td>
+                        <td class="p-4 font-mono font-bold text-brand-700">${d.id}</td>
+                        <td class="p-4 text-gray-600">${d.date}</td>
+                        <td class="p-4 font-semibold text-gray-800">${d.customer}</td>
+                        <td class="p-4 text-right font-bold text-gray-900">฿${d.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                        <td class="p-4 text-center">${statusBadge}</td>
+                        <td class="p-4 text-center space-x-2">
+                            <button onclick="openNewDocModal(${origIdx})" class="text-amber-600 hover:text-amber-800" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteDocument(${origIdx})" class="text-rose-500 hover:text-rose-700" title="ลบ"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function renderExpensesTable() {
             const tbody = document.getElementById('expensesTable');
-            const keyword = (document.getElementById('searchExpensesInput')?.value || '').toLowerCase();
-            const filtered = appData.expenses.filter(e => e.category.toLowerCase().includes(keyword) || e.vendor.toLowerCase().includes(keyword));
+            if (!tbody) return;
+            const search = (document.getElementById('searchExpensesInput')?.value || '').toLowerCase();
+            const filtered = appData.expenses.filter(e => e.desc.toLowerCase().includes(search) || e.vendor.toLowerCase().includes(search));
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="text-center py-6 text-gray-400">ยังไม่มีรายการรายจ่าย</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">ยังไม่มีรายการรายจ่าย</td></tr>`;
                 return;
             }
-            tbody.innerHTML = filtered.map((e, index) => `
-                <tr class="hover:bg-pink-50/50">
-                    <td class="p-4">${e.date}</td>
-                    <td class="p-4"><span class="px-2 py-1 bg-pink-50 text-brand-700 rounded-lg text-xs font-bold">${e.category}</span></td>
-                    <td class="p-4 text-gray-600">${e.description || '-'}</td>
-                    <td class="p-4 font-semibold">${e.vendor}</td>
-                    <td class="p-4 text-right font-semibold">฿${e.amount.toFixed(2)}</td>
-                    <td class="p-4 text-right">฿0.00</td>
-                    <td class="p-4 text-right text-amber-600">฿0.00</td>
-                    <td class="p-4 text-right font-bold text-rose-600">฿${e.amount.toFixed(2)}</td>
-                    <td class="p-4 text-center"><span class="text-xs text-gray-400">ไม่มีไฟล์</span></td>
-                    <td class="p-4 text-center"><button onclick="deleteExpense(${index})" class="text-red-500 hover:text-red-700 text-xs font-bold"><i class="fa-solid fa-trash"></i> ลบ</button></td>
-                </tr>
-            `).join('');
+
+            tbody.innerHTML = filtered.map(e => {
+                const origIdx = appData.expenses.indexOf(e);
+                const fileBadge = e.fileName
+                    ? `<span class="text-xs text-brand-600 font-semibold"><i class="fa-solid fa-paperclip"></i> ${e.fileName}</span>`
+                    : `<span class="text-xs text-gray-400">-</span>`;
+                return `
+                    <tr class="hover:bg-pink-50/30 transition">
+                        <td class="p-4 text-gray-600">${e.date}</td>
+                        <td class="p-4 font-semibold text-brand-700">${e.category}</td>
+                        <td class="p-4 text-gray-800">${e.desc}</td>
+                        <td class="p-4 text-gray-600">${e.vendor}</td>
+                        <td class="p-4 text-right font-bold text-rose-600">฿${e.netTotal.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                        <td class="p-4 text-center">${fileBadge}</td>
+                        <td class="p-4 text-center space-x-2">
+                            <button onclick="openNewExpenseModal(${origIdx})" class="text-amber-600 hover:text-amber-800" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteExpense(${origIdx})" class="text-rose-500 hover:text-rose-700" title="ลบ"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function renderProductsTable() {
             const tbody = document.getElementById('productsTable');
-            const keyword = (document.getElementById('searchProductsInput')?.value || '').toLowerCase();
-            const filtered = appData.products.filter(p => p.code.toLowerCase().includes(keyword) || p.name.toLowerCase().includes(keyword));
+            if (!tbody) return;
+            const search = (document.getElementById('searchProductsInput')?.value || '').toLowerCase();
+            const filtered = appData.products.filter(p => p.code.toLowerCase().includes(search) || p.name.toLowerCase().includes(search));
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-400">ยังไม่มีสินค้าในคลัง</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-400">ไม่พบรายการสินค้า</td></tr>`;
                 return;
             }
-            tbody.innerHTML = filtered.map((p, index) => `
-                <tr class="hover:bg-pink-50/50">
-                    <td class="p-4 font-mono font-bold text-gray-900">${p.code}</td>
-                    <td class="p-4 font-semibold">${p.name}</td>
-                    <td class="p-4 text-right text-gray-600">฿${p.cost.toFixed(2)}</td>
-                    <td class="p-4 text-right font-bold text-brand-700">฿${p.price.toFixed(2)}</td>
-                    <td class="p-4 text-center font-bold text-emerald-600">${p.stock}</td>
-                    <td class="p-4 text-center"><button onclick="deleteProduct(${index})" class="text-red-500 hover:text-red-700 text-xs font-bold"><i class="fa-solid fa-trash"></i> ลบ</button></td>
-                </tr>
-            `).join('');
+
+            tbody.innerHTML = filtered.map(p => {
+                const origIdx = appData.products.indexOf(p);
+                return `
+                    <tr class="hover:bg-pink-50/30 transition">
+                        <td class="p-4 font-mono font-bold text-brand-700">${p.code}</td>
+                        <td class="p-4 font-semibold text-gray-800">${p.name}</td>
+                        <td class="p-4 text-right text-gray-600">฿${p.cost.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                        <td class="p-4 text-right font-bold text-emerald-600">฿${p.price.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                        <td class="p-4 text-center font-semibold">${p.stock}</td>
+                        <td class="p-4 text-center space-x-2">
+                            <button onclick="openProductModal(${origIdx})" class="text-amber-600 hover:text-amber-800" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteProduct(${origIdx})" class="text-rose-500 hover:text-rose-700" title="ลบ"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function renderContactsTable() {
             const tbody = document.getElementById('contactsTable');
-            const keyword = (document.getElementById('searchContactsInput')?.value || '').toLowerCase();
-            const filtered = appData.contacts.filter(c => c.name.toLowerCase().includes(keyword) || c.phone.toLowerCase().includes(keyword));
+            if (!tbody) return;
+            const search = (document.getElementById('searchContactsInput')?.value || '').toLowerCase();
+            const filtered = appData.contacts.filter(c => c.name.toLowerCase().includes(search) || c.taxId.includes(search) || c.phone.includes(search));
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-gray-400">ยังไม่มีผู้ติดต่อในระบบ</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="p-8 text-center text-gray-400">ไม่พบข้อมูลผู้ติดต่อ</td></tr>`;
                 return;
             }
-            tbody.innerHTML = filtered.map((c, index) => `
-                <tr class="hover:bg-pink-50/50">
-                    <td class="p-4 font-bold text-gray-900">${c.name}</td>
-                    <td class="p-4 font-mono text-xs">${c.taxId}</td>
-                    <td class="p-4 text-gray-600 truncate max-w-xs">${c.address}</td>
-                    <td class="p-4">${c.phone}</td>
-                    <td class="p-4">${c.email}</td>
-                    <td class="p-4 text-center"><span class="px-2.5 py-1 rounded-full text-xs font-bold ${c.type === 'Customer' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}">${c.type === 'Customer' ? 'ลูกค้า' : 'ผู้ขาย'}</span></td>
-                    <td class="p-4 text-center"><button onclick="deleteContact(${index})" class="text-red-500 hover:text-red-700 text-xs font-bold"><i class="fa-solid fa-trash"></i> ลบ</button></td>
-                </tr>
-            `).join('');
+
+            tbody.innerHTML = filtered.map(c => {
+                const origIdx = appData.contacts.indexOf(c);
+                const typeBadge = c.type === 'Customer'
+                    ? `<span class="bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full text-xs font-bold">ลูกค้า</span>`
+                    : `<span class="bg-purple-50 text-purple-600 px-2.5 py-1 rounded-full text-xs font-bold">ผู้ขาย</span>`;
+                return `
+                    <tr class="hover:bg-pink-50/30 transition">
+                        <td class="p-4 font-semibold text-gray-800">${c.name}</td>
+                        <td class="p-4 font-mono text-gray-600">${c.taxId}</td>
+                        <td class="p-4 text-gray-600 text-xs max-w-xs truncate">${c.address}</td>
+                        <td class="p-4 text-gray-600">${c.phone}</td>
+                        <td class="p-4 text-gray-600">${c.email}</td>
+                        <td class="p-4 text-center">${typeBadge}</td>
+                        <td class="p-4 text-center space-x-2">
+                            <button onclick="openContactModal(${origIdx})" class="text-amber-600 hover:text-amber-800" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button onclick="deleteContact(${origIdx})" class="text-rose-500 hover:text-rose-700" title="ลบ"><i class="fa-solid fa-trash-can"></i></button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function updateDashboard() {
+            const paidSales = appData.documents.filter(d => d.status === 'Paid').reduce((sum, d) => sum + d.total, 0);
+            const pendingSales = appData.documents.filter(d => d.status === 'Pending').reduce((sum, d) => sum + d.total, 0);
+            const totalExpenses = appData.expenses.reduce((sum, e) => sum + e.netTotal, 0);
+            const netProfit = paidSales - totalExpenses;
+
+            if (document.getElementById('dashTotalSales')) document.getElementById('dashTotalSales').innerText = '฿' + paidSales.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            if (document.getElementById('dashTotalExpenses')) document.getElementById('dashTotalExpenses').innerText = '฿' + totalExpenses.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            if (document.getElementById('dashNetProfit')) document.getElementById('dashNetProfit').innerText = '฿' + netProfit.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            if (document.getElementById('dashPendingAmount')) document.getElementById('dashPendingAmount').innerText = '฿' + pendingSales.toLocaleString('en-US', { minimumFractionDigits: 2 });
+
+            const recentTbody = document.getElementById('dashRecentDocsTable');
+            if (recentTbody) {
+                if (appData.documents.length === 0) {
+                    recentTbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-gray-400">ไม่พบรายการเอกสารในระยะเวลานี้</td></tr>`;
+                } else {
+                    recentTbody.innerHTML = appData.documents.slice(0, 5).map(d => {
+                        const statusBadge = d.status === 'Paid'
+                            ? `<span class="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full font-bold">ชำระแล้ว</span>`
+                            : `<span class="bg-amber-50 text-amber-600 px-2 py-0.5 rounded-full font-bold">รอชำระ</span>`;
+                        return `
+                            <tr>
+                                <td class="py-3 px-2 font-mono font-bold text-brand-700">${d.id}</td>
+                                <td class="py-3 px-2 text-gray-600">${d.date}</td>
+                                <td class="py-3 px-2 font-semibold text-gray-800">${d.customer}</td>
+                                <td class="py-3 px-2 text-right font-bold">฿${d.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                                <td class="py-3 px-2 text-center">${statusBadge}</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            }
         }
 
         function renderReports() {
-            let totalRevenue = appData.documents.reduce((sum, d) => sum + d.subtotal, 0);
-            let totalExpenses = appData.expenses.reduce((sum, e) => sum + e.amount, 0);
-            let netProfit = totalRevenue - totalExpenses;
-            let totalVat = appData.documents.reduce((sum, d) => sum + d.vat, 0);
+            const netRev = appData.documents.filter(d => d.status === 'Paid').reduce((sum, d) => sum + (d.subtotal || 0), 0);
+            const vatAmt = appData.documents.filter(d => d.status === 'Paid').reduce((sum, d) => sum + (d.vat || 0), 0);
+            const netExp = appData.expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+            const wht3 = appData.expenses.filter(e => e.taxType === 'wht3').reduce((sum, e) => sum + (e.wht || 0), 0);
+            const wht5 = appData.expenses.filter(e => e.taxType === 'wht5').reduce((sum, e) => sum + (e.wht || 0), 0);
 
-            document.getElementById('rptNetRevenue').innerText = '฿' + totalRevenue.toFixed(2);
-            document.getElementById('rptNetExpenses').innerText = '฿' + totalExpenses.toFixed(2);
-            document.getElementById('rptProfit').innerText = '฿' + netProfit.toFixed(2);
-            document.getElementById('rptVatBase').innerText = '฿' + totalRevenue.toFixed(2);
-            document.getElementById('rptVatAmount').innerText = '฿' + totalVat.toFixed(2);
+            if (document.getElementById('rptNetRevenue')) document.getElementById('rptNetRevenue').innerText = '฿' + netRev.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            if (document.getElementById('rptNetExpenses')) document.getElementById('rptNetExpenses').innerText = '฿' + netExp.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            if (document.getElementById('rptProfit')) document.getElementById('rptProfit').innerText = '฿' + (netRev - netExp).toLocaleString('en-US', { minimumFractionDigits: 2 });
+            if (document.getElementById('rptVatBase')) document.getElementById('rptVatBase').innerText = '฿' + netRev.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            if (document.getElementById('rptVatAmount')) document.getElementById('rptVatAmount').innerText = '฿' + vatAmt.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            if (document.getElementById('rptWht3')) document.getElementById('rptWht3').innerText = '฿' + wht3.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            if (document.getElementById('rptWht5')) document.getElementById('rptWht5').innerText = '฿' + wht5.toLocaleString('en-US', { minimumFractionDigits: 2 });
+            if (document.getElementById('rptTotalWht')) document.getElementById('rptTotalWht').innerText = '฿' + (wht3 + wht5).toLocaleString('en-US', { minimumFractionDigits: 2 });
         }
 
-        function deleteDoc(index) { appData.documents.splice(index, 1); renderDocumentsTable(); updateDashboard(); }
-        function deleteExpense(index) { appData.expenses.splice(index, 1); renderExpensesTable(); updateDashboard(); }
-        function deleteProduct(index) { appData.products.splice(index, 1); renderProductsTable(); }
-        function deleteContact(index) { appData.contacts.splice(index, 1); renderContactsTable(); }
-
-        function updateDashboard() {
-            let totalSales = 0;
-            let pendingAmount = 0;
-            appData.documents.forEach(d => {
-                if (d.status === 'Paid') totalSales += d.total;
-                else pendingAmount += d.total;
-            });
-            let totalExpenses = appData.expenses.reduce((sum, e) => sum + e.amount, 0);
-            let netProfit = totalSales - totalExpenses;
-
-            document.getElementById('dashTotalSales').innerText = '฿' + totalSales.toFixed(2);
-            document.getElementById('dashTotalExpenses').innerText = '฿' + totalExpenses.toFixed(2);
-            document.getElementById('dashNetProfit').innerText = '฿' + netProfit.toFixed(2);
-            document.getElementById('dashPendingAmount').innerText = '฿' + pendingAmount.toFixed(2);
-
-            const recentTable = document.getElementById('dashRecentDocsTable');
-            if (appData.documents.length === 0) {
-                recentTable.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-gray-400">ไม่พบรายการเอกสารในระยะเวลานี้</td></tr>`;
-            } else {
-                recentTable.innerHTML = appData.documents.slice(-5).reverse().map(d => `
-                    <tr class="hover:bg-pink-50/50">
-                        <td class="py-3 px-2 font-mono font-medium">${d.id}</td>
-                        <td class="py-3 px-2">${d.date}</td>
-                        <td class="py-3 px-2 font-medium">${d.customer}</td>
-                        <td class="py-3 px-2 text-right font-semibold">฿${d.total.toFixed(2)}</td>
-                        <td class="py-3 px-2 text-center"><span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${d.status === 'Paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}">${d.status === 'Paid' ? 'ชำระแล้ว' : 'รอชำระ'}</span></td>
-                    </tr>
-                `).join('');
-            }
-        }
-
-        // Initialize App on Load
         window.onload = function() {
-            document.getElementById('cloudUserId').innerText = 'TKP-' + Math.floor(100000 + Math.random() * 900000);
+            const cloudId = document.getElementById('cloudUserId');
+            if (cloudId) cloudId.innerText = 'tkp7_sync_live_01';
             renderDocumentsTable();
             renderExpensesTable();
             renderProductsTable();
             renderContactsTable();
             updateDashboard();
+            renderReports();
         };
     </script>
 </body>
