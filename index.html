@@ -34,6 +34,23 @@
         .pink-gradient {
             background: linear-gradient(135deg, #f43f5e 0%, #be123c 100%);
         }
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printableDocumentArea, #printableDocumentArea * {
+                visibility: visible;
+            }
+            #printableDocumentArea {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50/50 font-sans text-gray-800 antialiased min-h-screen">
@@ -697,19 +714,21 @@
                         <label class="block font-bold text-brand-700 mb-1 flex items-center gap-1"><i class="fa-solid fa-signature"></i> ซิกเนเจอร์ / ลายเซ็น</label>
                         <div class="flex items-center gap-1 border border-gray-200 rounded-xl p-1 bg-gray-50">
                             <label class="bg-white border border-gray-300 px-2.5 py-1 rounded-lg cursor-pointer font-semibold text-gray-700 hover:bg-gray-100 text-[11px]">
-                                เลือกไฟล์ <input type="file" id="contSigFile" onchange="handleFileSelect(this, 'contSigName')" class="hidden" accept="image/*">
+                                เลือกไฟล์ <input type="file" id="contSigFile" onchange="handleImageUpload(this, 'contSigName', 'contSigData')" class="hidden" accept="image/*">
                             </label>
                             <span id="contSigName" class="text-gray-400 text-[10px] truncate">ไม่ได้เลือกไฟล์ใด</span>
                         </div>
+                        <input type="hidden" id="contSigData">
                     </div>
                     <div>
                         <label class="block font-bold text-brand-700 mb-1 flex items-center gap-1"><i class="fa-solid fa-stamp"></i> รูปตราประทับ</label>
                         <div class="flex items-center gap-1 border border-gray-200 rounded-xl p-1 bg-gray-50">
                             <label class="bg-white border border-gray-300 px-2.5 py-1 rounded-lg cursor-pointer font-semibold text-gray-700 hover:bg-gray-100 text-[11px]">
-                                เลือกไฟล์ <input type="file" id="contStampFile" onchange="handleFileSelect(this, 'contStampName')" class="hidden" accept="image/*">
+                                เลือกไฟล์ <input type="file" id="contStampFile" onchange="handleImageUpload(this, 'contStampName', 'contStampData')" class="hidden" accept="image/*">
                             </label>
                             <span id="contStampName" class="text-gray-400 text-[10px] truncate">ไม่ได้เลือกไฟล์ใด</span>
                         </div>
+                        <input type="hidden" id="contStampData">
                     </div>
                 </div>
                 <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
@@ -717,6 +736,125 @@
                     <button type="submit" class="px-5 py-2 pink-gradient text-white rounded-xl text-xs font-bold shadow hover:opacity-95">บันทึก</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal 5: ตัวอย่างเอกสาร (Document Print Preview Modal) -->
+    <div id="printPreviewModal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-4xl w-full p-6 space-y-5 shadow-2xl max-h-[95vh] overflow-y-auto">
+            <!-- Top Action Bar -->
+            <div class="flex flex-wrap justify-between items-center border-b border-gray-100 pb-4 gap-3">
+                <h3 class="text-lg font-bold text-brand-700 flex items-center gap-2">
+                    <i class="fa-solid fa-print"></i> ตัวอย่างเอกสาร
+                </h3>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="window.print()" class="pink-gradient hover:opacity-95 text-white px-4 py-2 rounded-xl text-xs font-bold shadow flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-print"></i> สั่งพิมพ์ / PDF
+                    </button>
+                    <button type="button" onclick="openStandalonePrint()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i> เปิดหน้าพิมพ์แยก
+                    </button>
+                    <button type="button" onclick="closePrintPreview()" class="border border-gray-200 hover:bg-gray-100 text-gray-600 px-4 py-2 rounded-xl text-xs font-bold transition">
+                        ปิด
+                    </button>
+                </div>
+            </div>
+
+            <!-- Printable Document Sheet -->
+            <div id="printableDocumentArea" class="bg-white border border-gray-200 rounded-2xl p-8 space-y-6 text-gray-800 shadow-sm">
+                <!-- Company & Doc Header -->
+                <div class="flex flex-col sm:flex-row justify-between items-start gap-4 border-b border-gray-100 pb-6">
+                    <div class="space-y-1">
+                        <h2 id="prevIssuerName" class="text-xl font-bold text-gray-900">บริษัท ทีเคพี เซเว่น โปรโซลูชั่น จำกัด</h2>
+                        <p id="prevIssuerAddress" class="text-xs text-gray-500">99/194 ม.3 ตำบลคลองสอง อำเภอคลองหลวง จังหวัด ปทุมธานี 12120</p>
+                        <p class="text-xs text-gray-500">เลขประจำตัวผู้เสียภาษี: <span id="prevIssuerTaxId">0135569027610</span></p>
+                        <p class="text-xs text-gray-500">เบอร์โทรศัพท์: <span id="prevIssuerPhone">0660927070</span> | อีเมล: <span id="prevIssuerEmail">tanthaizero@gmail.com</span></p>
+                    </div>
+                    <div class="text-left sm:text-right space-y-1">
+                        <div id="prevDocTitle" class="text-xl font-extrabold text-brand-600 tracking-tight uppercase">ใบเสนอราคา / QUOTATION</div>
+                        <p class="text-xs font-bold text-gray-800">เลขที่: <span id="prevDocId" class="font-mono">QT-2026-001</span></p>
+                        <p class="text-xs text-gray-500">วันที่: <span id="prevDocDate">2026-11-23</span></p>
+                    </div>
+                </div>
+
+                <!-- Customer & Payment Status Box -->
+                <div class="bg-gray-50/80 border border-gray-100 rounded-2xl p-5 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div class="md:col-span-2 space-y-1">
+                        <span class="font-bold text-gray-600 block">ข้อมูลลูกค้า (Customer):</span>
+                        <p id="prevCustName" class="text-sm font-bold text-gray-900">-</p>
+                        <p class="text-gray-600">เลขประจำตัวผู้เสียภาษี: <span id="prevCustTaxId">-</span></p>
+                        <p class="text-gray-600">ที่อยู่: <span id="prevCustAddress">-</span></p>
+                        <p class="text-gray-600">เบอร์โทรศัพท์: <span id="prevCustPhone">-</span> | อีเมล: <span id="prevCustEmail">-</span></p>
+                    </div>
+                    <div class="md:border-l md:border-gray-200 md:pl-5 space-y-1">
+                        <span class="font-bold text-gray-600 block">เงื่อนไขและการชำระเงิน:</span>
+                        <p class="text-gray-600">สถานะ: <span id="prevDocStatus" class="font-bold text-gray-900">รอชำระ</span></p>
+                    </div>
+                </div>
+
+                <!-- Items Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-gray-100 text-gray-700 font-bold border-y border-gray-200">
+                                <th class="py-3 px-3 text-center w-16">ลำดับ</th>
+                                <th class="py-3 px-3">รายการ / รายละเอียด</th>
+                                <th class="py-3 px-3 text-center w-24">จำนวน</th>
+                                <th class="py-3 px-3 text-right w-32">จำนวนเงิน (บาท)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="prevItemsBody" class="divide-y divide-gray-100">
+                            <!-- Dynamic Rows -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Summary Totals -->
+                <div class="flex justify-end pt-2">
+                    <div class="w-full sm:w-80 space-y-2 text-xs">
+                        <div class="flex justify-between text-gray-600">
+                            <span>ราคาก่อน VAT:</span>
+                            <span id="prevSubtotal" class="font-bold text-gray-900">฿0.00</span>
+                        </div>
+                        <div class="flex justify-between text-gray-600">
+                            <span>ส่วนลด:</span>
+                            <span id="prevDiscount" class="font-bold text-rose-600">-฿0.00</span>
+                        </div>
+                        <div id="prevVatRow" class="flex justify-between text-gray-600">
+                            <span>ภาษีมูลค่าเพิ่ม VAT 7%:</span>
+                            <span id="prevVat" class="font-bold text-gray-900">฿0.00</span>
+                        </div>
+                        <div id="prevWhtRow" class="hidden flex justify-between text-gray-600">
+                            <span>หัก ณ ที่จ่าย (WHT):</span>
+                            <span id="prevWht" class="font-bold text-amber-600">-฿0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center border-t border-pink-100 pt-2.5 text-sm font-bold text-brand-600">
+                            <span>จำนวนเงินรวมทั้งสิ้น (Grand Total):</span>
+                            <span id="prevGrandTotal" class="text-base">฿0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signatures Section -->
+                <div class="grid grid-cols-2 gap-8 pt-12 text-center text-xs text-gray-700">
+                    <div class="flex flex-col items-center justify-end space-y-2">
+                        <div class="h-24 flex items-end justify-center"></div>
+                        <div class="w-56 border-t border-dashed border-gray-400 pt-2">
+                            <p class="font-bold">ลายเซ็น ลูกค้า / ผู้ว่าจ้าง</p>
+                            <p class="text-[11px] text-gray-400 mt-1">วันที่ ........ / ........ / ........</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center justify-end space-y-2">
+                        <div id="prevIssuerStampSig" class="h-24 flex flex-col items-center justify-end gap-1">
+                            <!-- Dynamic Stamp & Signature -->
+                        </div>
+                        <div class="w-56 border-t border-dashed border-gray-400 pt-2">
+                            <p class="font-bold">ลายเซ็น ผู้รับเงิน / ผู้ออกเอกสาร</p>
+                            <p class="text-[11px] text-gray-400 mt-1">วันที่ ........ / ........ / ........</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -730,9 +868,9 @@
                 { code: 'P002', name: 'ให้คำปรึกษาภาษีอากร (ชั่วโมงละ)', cost: 1000, price: 2500, stock: 100 }
             ],
             contacts: [
-                { name: 'บริษัท เอสบีไอ อินเตอร์เนชั่นแนล จำกัด', taxId: '0105558887771', address: '129/1 อาคารสาทรซิตี้ทาวเวอร์ กรุงเทพฯ', phone: '02-555-1234', email: 'contact@sbi.co.th', type: 'Customer', sig: '', stamp: '' },
-                { name: 'บริษัท เอ็มแอนด์อาร์ อีออคทริค2 จำกัด', taxId: '0105559998881', address: '45/2 ถนนสุขุมวิท กรุงเทพฯ', phone: '02-888-9999', email: 'mr@electric.co.th', type: 'Vendor', sig: '', stamp: '' },
-                { name: 'การไฟฟ้าส่วนภูมิภาค เขต2 (ภาคเหนือ)', taxId: '0994000165511', address: 'เชียงใหม่', phone: '053-111-222', email: 'pea@pea.co.th', type: 'Customer', sig: '', stamp: '' }
+                { name: 'บริษัท ทีเคพี เซเว่น โปรโซลูชั่น จำกัด', taxId: '0135569027610', address: '99/194 ม.3 ตำบลคลองสอง อำเภอคลองหลวง จังหวัด ปทุมธานี 12120', phone: '0660927070', email: 'tanthaizero@gmail.com', type: 'Vendor', sig: '', sigData: '', stamp: '', stampData: '' },
+                { name: 'บริษัท เอสบีไอ อินเตอร์เนชั่นแนล จำกัด', taxId: '0105558887771', address: '129/1 อาคารสาทรซิตี้ทาวเวอร์ กรุงเทพฯ', phone: '02-555-1234', email: 'contact@sbi.co.th', type: 'Customer', sig: '', sigData: '', stamp: '', stampData: '' },
+                { name: 'การไฟฟ้าส่วนภูมิภาค เขต2 (ภาคเหนือ) จังหวัดพิษณุโลก (00321)', taxId: '0994000165501', address: '350/9 หมู่7 ถนนมิตรภาพ ตำบลสมลสมอแข อำเภอเมืองพิษณุโลก จังหวัดพิษณุโลก 65000', phone: '-', email: '-', type: 'Customer', sig: '', sigData: '', stamp: '', stampData: '' }
             ]
         };
 
@@ -783,28 +921,170 @@
             }
         }
 
-        // Modals Open / Close / Edit Handlers
+        function handleImageUpload(input, labelId, dataInputId) {
+            const label = document.getElementById(labelId);
+            const dataInput = document.getElementById(dataInputId);
+            if (input.files && input.files[0]) {
+                if (label) label.innerText = input.files[0].name;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (dataInput) dataInput.value = e.target.result;
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                if (label) label.innerText = 'ไม่ได้เลือกไฟล์ใด';
+                if (dataInput) dataInput.value = '';
+            }
+        }
+
+        // Document Print Preview Handlers
+        function openPrintPreview(index) {
+            const doc = appData.documents[index];
+            if (!doc) return;
+
+            const issuer = appData.contacts.find(c => c.name === doc.issuer) || {
+                name: doc.issuer || 'บริษัท ทีเคพี เซเว่น โปรโซลูชั่น จำกัด',
+                taxId: '0135569027610',
+                address: '99/194 ม.3 ตำบลคลองสอง อำเภอคลองหลวง จังหวัด ปทุมธานี 12120',
+                phone: '0660927070',
+                email: 'tanthaizero@gmail.com',
+                sigData: '',
+                stampData: ''
+            };
+
+            const customer = appData.contacts.find(c => c.name === doc.customer) || {
+                name: doc.customer || 'ลูกค้าทั่วไป',
+                taxId: '-',
+                address: '-',
+                phone: '-',
+                email: '-'
+            };
+
+            // Map Thai title to Uppercase English format matching reference
+            let titleText = 'ใบเสนอราคา / QUOTATION';
+            if (doc.type.includes('Invoice')) titleText = 'ใบแจ้งหนี้ / INVOICE';
+            else if (doc.type.includes('Receipt')) titleText = 'ใบเสร็จรับเงิน / RECEIPT';
+
+            document.getElementById('prevIssuerName').innerText = issuer.name;
+            document.getElementById('prevIssuerAddress').innerText = issuer.address || '-';
+            document.getElementById('prevIssuerTaxId').innerText = issuer.taxId || '-';
+            document.getElementById('prevIssuerPhone').innerText = issuer.phone || '-';
+            document.getElementById('prevIssuerEmail').innerText = issuer.email || '-';
+
+            document.getElementById('prevDocTitle').innerText = titleText;
+            document.getElementById('prevDocId').innerText = doc.id;
+            document.getElementById('prevDocDate').innerText = doc.date;
+
+            document.getElementById('prevCustName').innerText = customer.name;
+            document.getElementById('prevCustTaxId').innerText = customer.taxId || '-';
+            document.getElementById('prevCustAddress').innerText = customer.address || '-';
+            document.getElementById('prevCustPhone').innerText = customer.phone || '-';
+            document.getElementById('prevCustEmail').innerText = customer.email || '-';
+            document.getElementById('prevDocStatus').innerText = doc.status === 'Paid' ? 'ชำระแล้ว' : 'รอชำระ';
+
+            // Populate Items
+            const itemsBody = document.getElementById('prevItemsBody');
+            const items = doc.items && doc.items.length > 0 ? doc.items : [];
+            let rawSubtotal = 0;
+
+            itemsBody.innerHTML = items.map((item, idx) => {
+                const lineTotal = (item.qty || 1) * (item.price || 0);
+                rawSubtotal += lineTotal;
+                const codePrefix = item.code ? `<span class="text-brand-600 font-bold">[${item.code}]</span> ` : '';
+                return `
+                    <tr>
+                        <td class="py-3.5 px-3 text-center text-gray-600 align-top">${idx + 1}</td>
+                        <td class="py-3.5 px-3 text-gray-800 leading-relaxed">${codePrefix}${item.name}</td>
+                        <td class="py-3.5 px-3 text-center text-gray-800 align-top">${item.qty}</td>
+                        <td class="py-3.5 px-3 text-right font-bold text-gray-900 align-top">฿${lineTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const discount = doc.discount || 0;
+            const vat = doc.vat || 0;
+            const wht = doc.wht || 0;
+            const total = doc.total || 0;
+
+            document.getElementById('prevSubtotal').innerText = '฿' + rawSubtotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('prevDiscount').innerText = '-฿' + discount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            document.getElementById('prevVat').innerText = '฿' + vat.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            
+            const whtRow = document.getElementById('prevWhtRow');
+            if (wht > 0) {
+                whtRow.classList.remove('hidden');
+                document.getElementById('prevWht').innerText = '-฿' + wht.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+            } else {
+                whtRow.classList.add('hidden');
+            }
+
+            document.getElementById('prevGrandTotal').innerText = '฿' + total.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+            // Stamp & Signature Visuals
+            const stampSigContainer = document.getElementById('prevIssuerStampSig');
+            let stampSigHtml = '';
+            if (issuer.stampData) {
+                stampSigHtml += `<img src="${issuer.stampData}" alt="Stamp" class="h-12 object-contain">`;
+            }
+            if (issuer.sigData) {
+                stampSigHtml += `<img src="${issuer.sigData}" alt="Signature" class="h-10 object-contain">`;
+            }
+            stampSigContainer.innerHTML = stampSigHtml;
+
+            document.getElementById('printPreviewModal').classList.remove('hidden');
+        }
+
+        function closePrintPreview() {
+            document.getElementById('printPreviewModal').classList.add('hidden');
+        }
+
+        function openStandalonePrint() {
+            const content = document.getElementById('printableDocumentArea').innerHTML;
+            const win = window.open('', '_blank');
+            if (!win) return;
+            win.document.write(`
+                <!DOCTYPE html>
+                <html lang="th">
+                <head>
+                    <meta charset="UTF-8">
+                    <title>พิมพ์เอกสาร - TKP7 Accounting</title>
+                    <script src="https://cdn.tailwindcss.com"><\/script>
+                    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+                    <style>
+                        body { font-family: 'Sarabun', sans-serif; padding: 2rem; color: #1f2937; }
+                        .text-brand-600 { color: #e11d48; }
+                        @media print { body { padding: 0; } }
+                    </style>
+                </head>
+                <body onload="window.print()">
+                    <div class="max-w-4xl mx-auto space-y-6">${content}</div>
+                </body>
+                </html>
+            `);
+            win.document.close();
+        }
+
+        // Document Modal & Handlers
         function openNewDocModal(editIndex = -1) {
             const form = document.getElementById('docForm');
             if (form) form.reset();
             populateDocDropdowns();
-            const itemsBody = document.getElementById('docItemsTableBody');
-            if (itemsBody) itemsBody.innerHTML = '';
+            const tbody = document.getElementById('docItemsTableBody');
+            if (tbody) tbody.innerHTML = '';
 
             if (editIndex >= 0) {
-                const d = appData.documents[editIndex];
+                const doc = appData.documents[editIndex];
                 document.getElementById('docEditIndex').value = editIndex;
-                document.getElementById('docType').value = d.type;
-                document.getElementById('docId').value = d.id;
-                document.getElementById('docIssuerSelect').value = d.issuer || '';
-                document.getElementById('docCustomerSelect').value = d.customer;
-                document.getElementById('docDate').value = d.date;
-                document.getElementById('docStatus').value = d.status;
-                document.getElementById('docTaxType').value = d.taxType || 'vat7';
-                document.getElementById('docDiscount').value = d.discount || 0;
-
-                if (d.items && d.items.length > 0) {
-                    d.items.forEach(item => addDocItemRow(item));
+                document.getElementById('docType').value = doc.type;
+                document.getElementById('docId').value = doc.id;
+                document.getElementById('docIssuerSelect').value = doc.issuer || '';
+                document.getElementById('docCustomerSelect').value = doc.customer || '';
+                document.getElementById('docDate').value = doc.date;
+                document.getElementById('docStatus').value = doc.status;
+                document.getElementById('docTaxType').value = doc.taxType || 'vat7';
+                document.getElementById('docDiscount').value = doc.discount || 0;
+                if (doc.items && doc.items.length > 0) {
+                    doc.items.forEach(item => addDocItemRow(item));
                 } else {
                     addDocItemRow();
                 }
@@ -1155,6 +1435,8 @@
             const stampLabel = document.getElementById('contStampName');
             if (sigLabel) sigLabel.innerText = 'ไม่ได้เลือกไฟล์ใด';
             if (stampLabel) stampLabel.innerText = 'ไม่ได้เลือกไฟล์ใด';
+            if (document.getElementById('contSigData')) document.getElementById('contSigData').value = '';
+            if (document.getElementById('contStampData')) document.getElementById('contStampData').value = '';
 
             if (editIndex >= 0) {
                 const c = appData.contacts[editIndex];
@@ -1167,6 +1449,8 @@
                 document.getElementById('contEmail').value = c.email || '';
                 if (c.sig && sigLabel) sigLabel.innerText = c.sig;
                 if (c.stamp && stampLabel) stampLabel.innerText = c.stamp;
+                if (document.getElementById('contSigData')) document.getElementById('contSigData').value = c.sigData || '';
+                if (document.getElementById('contStampData')) document.getElementById('contStampData').value = c.stampData || '';
                 document.getElementById('contactModalTitle').innerHTML = `<i class="fa-solid fa-user-pen"></i> แก้ไขผู้ติดต่อ`;
             } else {
                 document.getElementById('contEditIndex').value = '-1';
@@ -1194,7 +1478,9 @@
                 type: document.getElementById('contType').value,
                 email: document.getElementById('contEmail').value || '-',
                 sig: sigLabel && sigLabel.innerText !== 'ไม่ได้เลือกไฟล์ใด' ? sigLabel.innerText : '',
-                stamp: stampLabel && stampLabel.innerText !== 'ไม่ได้เลือกไฟล์ใด' ? stampLabel.innerText : ''
+                sigData: document.getElementById('contSigData')?.value || '',
+                stamp: stampLabel && stampLabel.innerText !== 'ไม่ได้เลือกไฟล์ใด' ? stampLabel.innerText : '',
+                stampData: document.getElementById('contStampData')?.value || ''
             };
 
             const prevIssuer = document.getElementById('docIssuerSelect')?.value;
@@ -1254,6 +1540,7 @@
                         <td class="p-4 text-right font-bold text-gray-900">฿${d.total.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
                         <td class="p-4 text-center">${statusBadge}</td>
                         <td class="p-4 text-center space-x-2">
+                            <button onclick="openPrintPreview(${origIdx})" class="text-brand-600 hover:text-brand-800" title="พิมพ์เอกสารตัวอย่าง"><i class="fa-solid fa-print"></i></button>
                             <button onclick="openNewDocModal(${origIdx})" class="text-amber-600 hover:text-amber-800" title="แก้ไข"><i class="fa-solid fa-pen-to-square"></i></button>
                             <button onclick="deleteDocument(${origIdx})" class="text-rose-500 hover:text-rose-700" title="ลบ"><i class="fa-solid fa-trash-can"></i></button>
                         </td>
