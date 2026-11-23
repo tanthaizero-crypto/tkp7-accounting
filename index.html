@@ -912,20 +912,30 @@
         }
 
         async function initCloudSync() {
-            try {
-                if (typeof __firebase_config === 'undefined' || !__firebase_config) {
-                    return;
-                }
-               const firebaseConfig = {
-  apiKey: "AIzaSyAs-M2LnjgE7OADtio6bgGyn1TP58WQXwY",
-  authDomain: "tkp7-accounting.firebaseapp.com",
-  databaseURL: "https://tkp7-accounting-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "tkp7-accounting",
-  storageBucket: "tkp7-accounting.firebasestorage.app",
-  messagingSenderId: "125667880474",
-  appId: "1:125667880474:web:94d9aec9d20af3d311aba3",
-  measurementId: "G-ZML2XNBQ1N"
-};
+    try {
+        if (typeof __firebase_config === 'undefined' || !__firebase_config) {
+            return;
+        }
+
+        // --- นำโค้ดจาก Firebase มาวางตรงนี้ ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-analytics.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyAs-M2LnjgE7OADtio6bgGyn1TP58WQXwY",
+          authDomain: "tkp7-accounting.firebaseapp.com",
+          databaseURL: "https://tkp7-accounting-default-rtdb.asia-southeast1.firebasedatabase.app",
+          projectId: "tkp7-accounting",
+          storageBucket: "tkp7-accounting.firebasestorage.app",
+          messagingSenderId: "125667880474",
+          appId: "1:125667880474:web:94d9aec9d20af3d311aba3",
+          measurementId: "G-ZML2XNBQ1N"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        // ------------------------------------
 
 
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
