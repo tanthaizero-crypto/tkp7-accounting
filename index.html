@@ -912,15 +912,15 @@
                     updatedAt: new Date().toISOString()
                 });
             } catch (err) {
-                console.warn("Cloud sync write skipped due to permission restrictions. Saved locally.");
+                console.warn("Cloud sync write note:", err);
             }
         }
 
         async function initCloudSync() {
             try {
-                if (typeof __firebase_config === 'undefined') {
+                if (typeof __firebase_config === 'undefined' || !__firebase_config) {
                     const cloudId = document.getElementById('cloudUserId');
-                    if (cloudId) cloudId.innerText = 'offline_mode';
+                    if (cloudId) cloudId.innerText = 'offline_mode (Local Storage)';
                     return;
                 }
                 const firebaseConfig = JSON.parse(__firebase_config);
@@ -936,7 +936,9 @@
 
                 currentUser = auth.currentUser;
                 const cloudId = document.getElementById('cloudUserId');
-                if (cloudId && currentUser) cloudId.innerText = currentUser.uid;
+                if (cloudId && currentUser) {
+                    cloudId.innerText = currentUser.uid;
+                }
 
                 const stateRef = doc(db, 'artifacts', appId, 'state', 'tkp7_accounting');
                 onSnapshot(stateRef, (snap) => {
@@ -954,10 +956,12 @@
                         renderReports();
                     }
                 }, (error) => {
-                    console.warn("Snapshot listener permission warning handled. Using local persistence.");
+                    console.warn("Snapshot sync status:", error);
                 });
             } catch (e) {
-                console.warn("Firebase initialization skipped, using local storage.");
+                console.warn("Cloud initialization note:", e);
+                const cloudId = document.getElementById('cloudUserId');
+                if (cloudId) cloudId.innerText = 'offline_mode (Local Storage)';
             }
         }
 
