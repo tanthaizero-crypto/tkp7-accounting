@@ -916,7 +916,7 @@
                 if (typeof __firebase_config === 'undefined' || !__firebase_config) {
                     return;
                 }
-                const firebaseConfig = {
+               const firebaseConfig = {
   apiKey: "AIzaSyAs-M2LnjgE7OADtio6bgGyn1TP58WQXwY",
   authDomain: "tkp7-accounting.firebaseapp.com",
   databaseURL: "https://tkp7-accounting-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -927,9 +927,6 @@
   measurementId: "G-ZML2XNBQ1N"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
                     await signInWithCustomToken(auth, __initial_auth_token);
