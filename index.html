@@ -91,12 +91,6 @@
                 <i class="fa-solid fa-chart-line w-5 text-base"></i> รายงานบัญชีและการเงิน
             </button>
         </nav>
-
-        <!-- Cloud User Footer -->
-        <div class="p-4 border-t border-pink-50 bg-pink-50/30 text-xs text-gray-500 space-y-1">
-            <span class="font-bold text-gray-700 block">Cloud User ID:</span>
-            <span id="cloudUserId" class="font-mono text-brand-600 font-semibold break-all">Connecting...</span>
-        </div>
     </aside>
 
     <!-- Main Content Area (With left margin for fixed sidebar) -->
@@ -901,16 +895,17 @@
                 console.error("Local storage save error:", e);
             }
 
-            if (!db || !currentUser) return;
+            if (!db) return;
             try {
-                const stateRef = doc(db, 'artifacts', appId, 'users', currentUser.uid);
+                // Use standard public collection path so that Firestore rules allow read/write without auth obstacles
+                const stateRef = doc(db, 'artifacts', appId, 'public', 'tkp7_accounting_state');
                 await setDoc(stateRef, {
                     documents: JSON.stringify(appData.documents),
                     expenses: JSON.stringify(appData.expenses),
                     products: JSON.stringify(appData.products),
                     contacts: JSON.stringify(appData.contacts),
                     updatedAt: new Date().toISOString()
-                });
+                }, { merge: true });
             } catch (err) {
                 console.warn("Cloud sync write note:", err);
             }
@@ -919,8 +914,6 @@
         async function initCloudSync() {
             try {
                 if (typeof __firebase_config === 'undefined' || !__firebase_config) {
-                    const cloudId = document.getElementById('cloudUserId');
-                    if (cloudId) cloudId.innerText = 'offline_mode (Local Storage)';
                     return;
                 }
                 const firebaseConfig = JSON.parse(__firebase_config);
@@ -935,19 +928,15 @@
                 }
 
                 currentUser = auth.currentUser;
-                const cloudId = document.getElementById('cloudUserId');
-                if (cloudId && currentUser) {
-                    cloudId.innerText = currentUser.uid;
-                }
 
-                const stateRef = doc(db, 'artifacts', appId, 'users', currentUser.uid);
+                const stateRef = doc(db, 'artifacts', appId, 'public', 'tkp7_accounting_state');
                 onSnapshot(stateRef, (snap) => {
                     if (snap.exists()) {
                         const data = snap.data();
-                        appData.documents = data.documents ? JSON.parse(data.documents) : appData.documents;
-                        appData.expenses = data.expenses ? JSON.parse(data.expenses) : appData.expenses;
-                        appData.products = data.products ? JSON.parse(data.products) : appData.products;
-                        appData.contacts = data.contacts ? JSON.parse(data.contacts) : appData.contacts;
+                        if (data.documents) appData.documents = JSON.parse(data.documents);
+                        if (data.expenses) appData.expenses = JSON.parse(data.expenses);
+                        if (data.products) appData.products = JSON.parse(data.products);
+                        if (data.contacts) appData.contacts = JSON.parse(data.contacts);
                         renderDocumentsTable();
                         renderExpensesTable();
                         renderProductsTable();
@@ -960,8 +949,6 @@
                 });
             } catch (e) {
                 console.warn("Cloud initialization note:", e);
-                const cloudId = document.getElementById('cloudUserId');
-                if (cloudId) cloudId.innerText = 'offline_mode (Local Storage)';
             }
         }
 
