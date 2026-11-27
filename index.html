@@ -93,8 +93,8 @@
         </nav>
     </aside>
 
-    <!-- Main Content Area (With left margin for fixed sidebar) -->
-    <main class="ml-64 p-8 min-h-screen">
+        // Main Content Area (With left margin for fixed sidebar)
+        <main class="ml-64 p-8 min-h-screen">
         
         <!-- Tab 1: Dashboard -->
         <section id="tab-dashboard" class="space-y-6">
@@ -617,12 +617,14 @@
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
-                    <!-- Image Preview Thumbnail -->
-                    <div id="expImagePreviewBox" class="hidden mt-2 relative border border-pink-200 rounded-xl p-2 bg-pink-50/30 flex items-center justify-center">
-                        <img id="expImagePreview" src="" alt="ตัวอย่างหลักฐาน" class="max-h-32 rounded-lg object-contain shadow-sm">
+                    <!-- Image & PDF Preview Container -->
+                    <div id="expImagePreviewBox" class="hidden mt-2 relative border border-pink-200 rounded-xl p-2.5 bg-pink-50/30 flex flex-col items-center justify-center gap-2">
+                        <img id="expImagePreview" src="" alt="ตัวอย่างหลักฐาน" class="hidden max-h-44 w-auto rounded-lg object-contain shadow-sm">
+                        <iframe id="expPdfPreview" src="" class="hidden w-full h-48 rounded-lg border border-gray-200 bg-white"></iframe>
                     </div>
-                    <p id="expFileStatusHint" class="text-[11px] text-gray-400 mt-1">ระบบจะย่อขนาดรูปภาพอัตโนมัติเพื่อให้บันทึกลง Cloud ได้เสถียร (PDF ไม่เกิน 500 KB)</p>
+                    <p id="expFileStatusHint" class="text-[11px] text-gray-400 mt-1">ระบบจะย่อขนาดรูปภาพอัตโนมัติและแยกเก็บไฟล์บน Cloud แยกตามรายการ (PDF ไม่เกิน 750 KB)</p>
                     <input type="hidden" id="expFileData">
+                    <input type="hidden" id="expFileId">
                 </div>
                 <div class="flex justify-end gap-2 pt-2 border-t border-gray-100">
                     <button type="button" onclick="closeExpenseModal()" class="px-4 py-2 border border-gray-200 text-gray-600 rounded-xl text-xs font-semibold hover:bg-gray-100">ยกเลิก</button>
@@ -882,11 +884,14 @@
         </div>
     </div>
 
+    <!-- Custom Toast Notification (No alert() used) -->
+    <div id="toastContainer" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
     <!-- Application JavaScript Logic -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         let db = null;
         let auth = null;
@@ -919,7 +924,35 @@
             console.error("Local storage read error:", e);
         }
 
-        // Utility: Compress image file before storing in Firestore/LocalStorage to stay safely under 1MB limit
+        // Custom Toast Notification Helper
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-emerald-600 text-white border-emerald-700',
+                error: 'bg-rose-600 text-white border-rose-700',
+                warning: 'bg-amber-500 text-white border-amber-600',
+                info: 'bg-gray-800 text-white border-gray-900'
+            };
+            const icons = {
+                success: 'fa-circle-check',
+                error: 'fa-circle-exclamation',
+                warning: 'fa-triangle-exclamation',
+                info: 'fa-circle-info'
+            };
+            toast.className = `pointer-events-auto flex items-start gap-2.5 px-4 py-3 rounded-xl shadow-lg border text-xs font-medium transition-all duration-300 transform translate-y-2 opacity-0 ${colors[type] || colors.info}`;
+            toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info} text-sm mt-0.5 shrink-0"></i><span class="leading-relaxed">${message}</span>`;
+            container.appendChild(toast);
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            });
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 4500);
+        }
+        // Utility: Compress image file before storing in Firestore/LocalStorage
         function compressImageFile(file, maxWidth = 1000, quality = 0.72) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -944,8 +977,8 @@
                         canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        // Keep PNG transparency if PNG, otherwise convert to optimized JPEG
-                        const mimeType = file.type === 'image/png' ? 'image/png' : 'image/jpeg';
+                        // Convert photos to optimized JPEG to drastically reduce size (unless small transparent PNG)
+                        const mimeType = (file.type === 'image/png' && file.size < 150 * 1024) ? 'image/png' : 'image/jpeg';
                         const compressedDataUrl = canvas.toDataURL(mimeType, quality);
                         resolve(compressedDataUrl);
                     };
@@ -955,7 +988,74 @@
             });
         }
 
+        // Save individual file payload to dedicated Firestore document so main state never hits 1MB limit
+        async function saveFileToCloud(fileId, fileName, fileData) {
+            if (!fileId || !fileData) return;
+            try {
+                localStorage.setItem('tkp7_file_' + appId + '_' + fileId, fileData);
+            } catch (e) {
+                console.warn("Local file cache full:", e);
+            }
+            if (!db) return;
+            try {
+                const fileRef = doc(db, 'artifacts', appId, 'public', 'tkp7_accounting_state', 'files', fileId);
+                await setDoc(fileRef, {
+                    fileName: fileName || '',
+                    fileData: fileData,
+                    updatedAt: new Date().toISOString()
+                });
+            } catch (err) {
+                console.error("Failed to upload individual file to cloud:", err);
+                showToast("ไฟล์มีขนาดใหญ่เกิน 1 MB ไม่สามารถอัปโหลดขึ้น Cloud ได้", "error");
+            }
+        }
+
+        // Fetch individual file payload from LocalStorage cache or Cloud sub-collection
+        async function loadFileFromCloud(fileId) {
+            if (!fileId) return '';
+            const cached = localStorage.getItem('tkp7_file_' + appId + '_' + fileId);
+            if (cached) return cached;
+            if (!db) return '';
+            try {
+                const fileRef = doc(db, 'artifacts', appId, 'public', 'tkp7_accounting_state', 'files', fileId);
+                const snap = await getDoc(fileRef);
+                if (snap.exists() && snap.data().fileData) {
+                    const dataUrl = snap.data().fileData;
+                    try {
+                        localStorage.setItem('tkp7_file_' + appId + '_' + fileId, dataUrl);
+                    } catch (e) {}
+                    return dataUrl;
+                }
+            } catch (err) {
+                console.error("Error fetching file from cloud:", err);
+            }
+            return '';
+        }
+
+        async function deleteFileFromCloud(fileId) {
+            if (!fileId) return;
+            localStorage.removeItem('tkp7_file_' + appId + '_' + fileId);
+            if (!db) return;
+            try {
+                const fileRef = doc(db, 'artifacts', appId, 'public', 'tkp7_accounting_state', 'files', fileId);
+                await deleteDoc(fileRef);
+            } catch (err) {
+                console.warn("File delete note:", err);
+            }
+        }
+
         async function syncToCloud() {
+            // Migrate any legacy inline fileData inside expenses to separate cloud documents
+            for (let i = 0; i < appData.expenses.length; i++) {
+                const exp = appData.expenses[i];
+                if (exp.fileData) {
+                    const fileId = exp.fileId || ('exp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8));
+                    await saveFileToCloud(fileId, exp.fileName, exp.fileData);
+                    exp.fileId = fileId;
+                    delete exp.fileData; // Strip heavy Base64 out of main state document
+                }
+            }
+
             const serializedState = {
                 documents: JSON.stringify(appData.documents),
                 expenses: JSON.stringify(appData.expenses),
@@ -964,16 +1064,10 @@
                 updatedAt: new Date().toISOString()
             };
 
-            const totalBytes = new Blob([JSON.stringify(serializedState)]).size;
-            if (totalBytes > 950000) {
-                alert("คำเตือน: ขนาดข้อมูลรวมในระบบใกล้เต็มความจุ Cloud (1 MB) กรุณาลบไฟล์แนบเก่าบางรายการออกเพื่อให้ซิงค์ข้อมูลได้ต่อเนื่อง");
-            }
-
             try {
                 localStorage.setItem('tkp7_accounting_data_' + appId, JSON.stringify(appData));
             } catch (e) {
                 console.error("Local storage save error:", e);
-                alert("พื้นที่จัดเก็บในเบราว์เซอร์เต็ม ไม่สามารถบันทึกไฟล์ขนาดใหญ่นี้ได้");
             }
 
             if (!db) return;
@@ -982,7 +1076,7 @@
                 await setDoc(stateRef, serializedState, { merge: true });
             } catch (err) {
                 console.error("Cloud sync write failed:", err);
-                alert("ไม่สามารถซิงค์ไฟล์ขึ้น Cloud ได้เนื่องจากขนาดไฟล์ใหญ่เกินกำหนด (เกิน 1 MB) ระบบจะบันทึกไว้เฉพาะในเครื่องนี้ชั่วคราว");
+                showToast("เกิดข้อผิดพลาดในการซิงค์ข้อมูลขึ้น Cloud กรุณาลองใหม่อีกครั้ง", "error");
             }
         }
 
@@ -1085,7 +1179,7 @@
                         label.classList.add('text-brand-700', 'font-semibold');
                     }
                 } catch (err) {
-                    alert(err.message);
+                    showToast(err.message, "error");
                     if (label) label.innerText = 'ไม่ได้เลือกไฟล์ใด';
                 }
             }
@@ -1095,12 +1189,15 @@
             const fileInput = document.getElementById('expFile');
             const label = document.getElementById('expFileName');
             const dataInput = document.getElementById('expFileData');
+            const fileIdInput = document.getElementById('expFileId');
             const clearBtn = document.getElementById('expClearFileBtn');
             const previewBox = document.getElementById('expImagePreviewBox');
             const previewImg = document.getElementById('expImagePreview');
+            const previewPdf = document.getElementById('expPdfPreview');
 
             if (fileInput) fileInput.value = '';
             if (dataInput) dataInput.value = '';
+            if (fileIdInput) fileIdInput.value = '';
             if (label) {
                 label.innerText = 'ไม่ได้เลือกไฟล์ใด';
                 label.classList.remove('text-brand-700', 'text-amber-600', 'font-semibold');
@@ -1108,17 +1205,55 @@
             }
             if (clearBtn) clearBtn.classList.add('hidden');
             if (previewBox) previewBox.classList.add('hidden');
-            if (previewImg) previewImg.src = '';
+            if (previewImg) {
+                previewImg.src = '';
+                previewImg.classList.add('hidden');
+            }
+            if (previewPdf) {
+                previewPdf.src = '';
+                previewPdf.classList.add('hidden');
+            }
         };
+
+        // Helper to show Image or PDF preview inside the Expense Modal
+        function showExpenseModalPreview(dataUrl) {
+            const previewBox = document.getElementById('expImagePreviewBox');
+            const previewImg = document.getElementById('expImagePreview');
+            const previewPdf = document.getElementById('expPdfPreview');
+            if (!previewBox || !dataUrl) return;
+
+            if (dataUrl.startsWith('data:image/')) {
+                if (previewPdf) {
+                    previewPdf.src = '';
+                    previewPdf.classList.add('hidden');
+                }
+                if (previewImg) {
+                    previewImg.src = dataUrl;
+                    previewImg.classList.remove('hidden');
+                }
+                previewBox.classList.remove('hidden');
+            } else if (dataUrl.startsWith('data:application/pdf')) {
+                if (previewImg) {
+                    previewImg.src = '';
+                    previewImg.classList.add('hidden');
+                }
+                if (previewPdf) {
+                    previewPdf.src = dataUrl;
+                    previewPdf.classList.remove('hidden');
+                }
+                previewBox.classList.remove('hidden');
+            } else {
+                previewBox.classList.add('hidden');
+            }
+        }
 
         // Handle expense attachment upload (PDF or Image) with automatic compression & lock submit until ready
         window.handleExpenseFileSelect = async function(input) {
             const label = document.getElementById('expFileName');
             const dataInput = document.getElementById('expFileData');
+            const fileIdInput = document.getElementById('expFileId');
             const submitBtn = document.getElementById('expSubmitBtn');
             const clearBtn = document.getElementById('expClearFileBtn');
-            const previewBox = document.getElementById('expImagePreviewBox');
-            const previewImg = document.getElementById('expImagePreview');
 
             if (!input.files || !input.files[0]) {
                 clearExpenseFile();
@@ -1142,14 +1277,10 @@
                 if (file.type.startsWith('image/')) {
                     // Compress image to max 1000px width, 0.72 quality (~80-150 KB)
                     finalDataUrl = await compressImageFile(file, 1000, 0.72);
-                    if (previewImg && previewBox) {
-                        previewImg.src = finalDataUrl;
-                        previewBox.classList.remove('hidden');
-                    }
                 } else {
-                    // PDF or non-image file: check size limit (max 500 KB for Firestore compatibility)
-                    if (file.size > 500 * 1024) {
-                        throw new Error("ไฟล์ PDF มีขนาดใหญ่เกิน 500 KB กรุณาย่อขนาดไฟล์ PDF หรือบันทึกเป็นไฟล์รูปภาพแทน");
+                    // PDF or non-image file: check size limit (max 750 KB per document)
+                    if (file.size > 750 * 1024) {
+                        throw new Error("ไฟล์ PDF มีขนาดใหญ่เกิน 750 KB กรุณาย่อขนาดไฟล์ PDF หรือถ่ายรูปใบเสร็จแทน");
                     }
                     finalDataUrl = await new Promise((resolve, reject) => {
                         const reader = new FileReader();
@@ -1157,10 +1288,14 @@
                         reader.onerror = () => reject(new Error("ไม่สามารถอ่านไฟล์ได้"));
                         reader.readAsDataURL(file);
                     });
-                    if (previewBox) previewBox.classList.add('hidden');
                 }
 
+                showExpenseModalPreview(finalDataUrl);
+
                 if (dataInput) dataInput.value = finalDataUrl;
+                if (fileIdInput && !fileIdInput.value) {
+                    fileIdInput.value = 'exp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+                }
                 if (label) {
                     label.innerText = file.name;
                     label.classList.remove('text-amber-600');
@@ -1168,7 +1303,7 @@
                 }
                 if (clearBtn) clearBtn.classList.remove('hidden');
             } catch (err) {
-                alert(err.message);
+                showToast(err.message, "error");
                 clearExpenseFile();
             } finally {
                 isProcessingFile = false;
@@ -1179,28 +1314,36 @@
             }
         };
 
-        // Preview attached expense file in modal
-        window.viewExpenseFile = function(index) {
+        // Preview attached expense file in modal (fetches on-demand from Cloud)
+        window.viewExpenseFile = async function(index) {
             const exp = appData.expenses[index];
-            if (!exp || !exp.fileData) return;
+            if (!exp) return;
             const modal = document.getElementById('evidenceViewerModal');
             const titleEl = document.getElementById('viewerFileName');
             const contentArea = document.getElementById('viewerContentArea');
             const downloadBtn = document.getElementById('viewerDownloadBtn');
 
             if (titleEl) titleEl.innerText = exp.fileName || 'หลักฐานรายจ่าย';
+            contentArea.innerHTML = `<div class="flex flex-col items-center gap-2 text-gray-500 text-xs"><i class="fa-solid fa-spinner fa-spin text-2xl text-brand-600"></i><span>กำลังโหลดไฟล์หลักฐานจาก Cloud...</span></div>`;
+            modal.classList.remove('hidden');
+
+            const fileData = exp.fileData || await loadFileFromCloud(exp.fileId);
+            if (!fileData) {
+                contentArea.innerHTML = `<p class="text-sm text-rose-500">ไม่พบข้อมูลไฟล์ในระบบ กรุณาแก้ไขรายการและแนบไฟล์ใหม่อีกครั้ง</p>`;
+                return;
+            }
+
             if (downloadBtn) {
                 downloadBtn.onclick = () => downloadExpenseFile(index);
             }
 
-            if (exp.fileData.startsWith('data:image/')) {
-                contentArea.innerHTML = `<img src="${exp.fileData}" alt="${exp.fileName}" class="max-w-full max-h-[65vh] rounded-lg object-contain shadow">`;
-            } else if (exp.fileData.startsWith('data:application/pdf')) {
-                contentArea.innerHTML = `<iframe src="${exp.fileData}" class="w-full h-[65vh] rounded-lg border-0"></iframe>`;
+            if (fileData.startsWith('data:image/')) {
+                contentArea.innerHTML = `<img src="${fileData}" alt="${exp.fileName}" class="max-w-full max-h-[65vh] rounded-lg object-contain shadow">`;
+            } else if (fileData.startsWith('data:application/pdf')) {
+                contentArea.innerHTML = `<iframe src="${fileData}" class="w-full h-[65vh] rounded-lg border-0"></iframe>`;
             } else {
                 contentArea.innerHTML = `<p class="text-sm text-gray-500">ไม่รองรับการแสดงตัวอย่างไฟล์ประเภทนี้ กรุณากดปุ่มดาวน์โหลด</p>`;
             }
-            modal.classList.remove('hidden');
         };
 
         window.closeEvidenceViewer = function() {
@@ -1209,11 +1352,17 @@
         };
 
         // Download attached expense file
-        window.downloadExpenseFile = function(index) {
+        window.downloadExpenseFile = async function(index) {
             const exp = appData.expenses[index];
-            if (!exp || !exp.fileData) return;
+            if (!exp) return;
+            showToast("กำลังเตรียมไฟล์ดาวน์โหลด...", "info");
+            const fileData = exp.fileData || await loadFileFromCloud(exp.fileId);
+            if (!fileData) {
+                showToast("ไม่พบข้อมูลไฟล์สำหรับดาวน์โหลด", "error");
+                return;
+            }
             const link = document.createElement('a');
-            link.href = exp.fileData;
+            link.href = fileData;
             link.download = exp.fileName || 'evidence_file';
             document.body.appendChild(link);
             link.click();
@@ -1590,7 +1739,7 @@
             });
         }
 
-        window.openNewExpenseModal = function(editIndex = -1) {
+        window.openNewExpenseModal = async function(editIndex = -1) {
             const form = document.getElementById('expenseForm');
             if (form) form.reset();
             populateExpenseVendors();
@@ -1598,9 +1747,8 @@
 
             const fileLabel = document.getElementById('expFileName');
             const fileDataInput = document.getElementById('expFileData');
+            const fileIdInput = document.getElementById('expFileId');
             const clearBtn = document.getElementById('expClearFileBtn');
-            const previewBox = document.getElementById('expImagePreviewBox');
-            const previewImg = document.getElementById('expImagePreview');
 
             if (editIndex >= 0) {
                 const exp = appData.expenses[editIndex];
@@ -1617,12 +1765,13 @@
                     fileLabel.classList.add('text-brand-700', 'font-semibold');
                     if (clearBtn) clearBtn.classList.remove('hidden');
                 }
-                if (exp.fileData && fileDataInput) {
-                    fileDataInput.value = exp.fileData;
-                    if (exp.fileData.startsWith('data:image/') && previewBox && previewImg) {
-                        previewImg.src = exp.fileData;
-                        previewBox.classList.remove('hidden');
-                    }
+                if (exp.fileId && fileIdInput) {
+                    fileIdInput.value = exp.fileId;
+                }
+                const existingData = exp.fileData || await loadFileFromCloud(exp.fileId);
+                if (existingData && fileDataInput) {
+                    fileDataInput.value = existingData;
+                    showExpenseModalPreview(existingData);
                 }
             } else {
                 document.getElementById('expEditIndex').value = '-1';
@@ -1652,56 +1801,90 @@
         window.saveExpense = async function(e) {
             e.preventDefault();
             if (isProcessingFile) {
-                alert("กรุณารอสักครู่ ระบบกำลังประมวลผลไฟล์แนบ");
+                showToast("กรุณารอสักครู่ ระบบกำลังประมวลผลไฟล์แนบ", "warning");
                 return;
             }
 
-            const editIndex = parseInt(document.getElementById('expEditIndex').value);
-            const amount = parseFloat(document.getElementById('expAmount').value) || 0;
-            const taxType = document.getElementById('expTaxType').value;
-            let vat = 0;
-            let wht = 0;
-            if (taxType === 'vat7') vat = amount * 0.07;
-            else if (taxType === 'wht3') wht = amount * 0.03;
-            else if (taxType === 'wht5') wht = amount * 0.05;
-
-            const fileLabel = document.getElementById('expFileName');
-            const fileName = fileLabel && fileLabel.innerText !== 'ไม่ได้เลือกไฟล์ใด' ? fileLabel.innerText : '';
-            const fileData = document.getElementById('expFileData')?.value || '';
-
-            const expObj = {
-                date: document.getElementById('expDate').value,
-                category: document.getElementById('expCategory').value,
-                desc: document.getElementById('expDesc').value || '-',
-                vendor: document.getElementById('expVendorSelect').value || '-',
-                amount,
-                taxType,
-                vat,
-                wht,
-                netTotal: amount + vat - wht,
-                fileName,
-                fileData
-            };
-
-            if (editIndex >= 0) {
-                appData.expenses[editIndex] = expObj;
-            } else {
-                appData.expenses.unshift(expObj);
+            const submitBtn = document.getElementById('expSubmitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'กำลังบันทึก...';
             }
 
-            await syncToCloud();
-            closeExpenseModal();
-            renderExpensesTable();
-            updateDashboard();
-            renderReports();
+            try {
+                const editIndex = parseInt(document.getElementById('expEditIndex').value);
+                const amount = parseFloat(document.getElementById('expAmount').value) || 0;
+                const taxType = document.getElementById('expTaxType').value;
+                let vat = 0;
+                let wht = 0;
+                if (taxType === 'vat7') vat = amount * 0.07;
+                else if (taxType === 'wht3') wht = amount * 0.03;
+                else if (taxType === 'wht5') wht = amount * 0.05;
+
+                const fileLabel = document.getElementById('expFileName');
+                const fileName = fileLabel && fileLabel.innerText !== 'ไม่ได้เลือกไฟล์ใด' ? fileLabel.innerText : '';
+                const fileData = document.getElementById('expFileData')?.value || '';
+                let fileId = document.getElementById('expFileId')?.value || '';
+
+                // If editing an existing record and user cleared or replaced the file, clean up old file if needed
+                if (editIndex >= 0) {
+                    const oldExp = appData.expenses[editIndex];
+                    if (oldExp.fileId && !fileName) {
+                        await deleteFileFromCloud(oldExp.fileId);
+                        fileId = '';
+                    }
+                }
+
+                if (fileName && fileData) {
+                    if (!fileId) fileId = 'exp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+                    await saveFileToCloud(fileId, fileName, fileData);
+                }
+
+                const expObj = {
+                    date: document.getElementById('expDate').value,
+                    category: document.getElementById('expCategory').value,
+                    desc: document.getElementById('expDesc').value || '-',
+                    vendor: document.getElementById('expVendorSelect').value || '-',
+                    amount,
+                    taxType,
+                    vat,
+                    wht,
+                    netTotal: amount + vat - wht,
+                    fileName,
+                    fileId
+                };
+
+                if (editIndex >= 0) {
+                    appData.expenses[editIndex] = expObj;
+                } else {
+                    appData.expenses.unshift(expObj);
+                }
+
+                await syncToCloud();
+                closeExpenseModal();
+                renderExpensesTable();
+                updateDashboard();
+                renderReports();
+                showToast("บันทึกรายจ่ายและหลักฐานเรียบร้อยแล้ว", "success");
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = 'บันทึก';
+                }
+            }
         };
 
         window.deleteExpense = async function(index) {
+            const exp = appData.expenses[index];
+            if (exp && exp.fileId) {
+                await deleteFileFromCloud(exp.fileId);
+            }
             appData.expenses.splice(index, 1);
             await syncToCloud();
             renderExpensesTable();
             updateDashboard();
             renderReports();
+            showToast("ลบรายการรายจ่ายเรียบร้อยแล้ว", "info");
         };
 
         // Product Modal & Handlers
@@ -1889,14 +2072,20 @@
                 const origIdx = appData.expenses.indexOf(e);
                 let fileBadge = `<span class="text-xs text-gray-400">-</span>`;
                 if (e.fileName) {
-                    if (e.fileData) {
-                        const isImg = e.fileData.startsWith('data:image/');
-                        const iconClass = isImg ? 'fa-image' : 'fa-file-pdf';
+                    if (e.fileId || e.fileData) {
+                        const isPdf = e.fileName.toLowerCase().endsWith('.pdf') || (e.fileData && e.fileData.startsWith('data:application/pdf'));
+                        const cachedData = e.fileData || (e.fileId ? localStorage.getItem('tkp7_file_' + appId + '_' + e.fileId) : '');
+                        const isImage = !isPdf && (/\.(jpg|jpeg|png|gif|webp)$/i.test(e.fileName) || (cachedData && cachedData.startsWith('data:image/')));
+                        const iconClass = isPdf ? 'fa-file-pdf' : 'fa-image';
+                        const thumbHtml = (isImage && cachedData)
+                            ? `<img src="${cachedData}" alt="thumb" class="w-7 h-7 rounded object-cover border border-pink-200 shrink-0">`
+                            : `<i class="fa-solid ${iconClass} text-sm"></i>`;
+
                         fileBadge = `
-                            <div class="inline-flex items-center gap-1">
-                                <button type="button" onclick="viewExpenseFile(${origIdx})" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-pink-50 hover:bg-pink-100 text-brand-700 text-xs font-semibold transition border border-pink-200/70" title="เปิดดูไฟล์หลักฐาน">
-                                    <i class="fa-solid ${iconClass}"></i>
-                                    <span class="max-w-[110px] truncate">${e.fileName}</span>
+                            <div class="inline-flex items-center gap-1.5">
+                                <button type="button" onclick="viewExpenseFile(${origIdx})" class="inline-flex items-center gap-2 px-2 py-1 rounded-lg bg-pink-50 hover:bg-pink-100 text-brand-700 text-xs font-semibold transition border border-pink-200/70" title="คลิกเพื่อดูตัวอย่างหลักฐาน">
+                                    ${thumbHtml}
+                                    <span class="max-w-[100px] truncate">${e.fileName}</span>
                                 </button>
                                 <button type="button" onclick="downloadExpenseFile(${origIdx})" class="p-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs transition" title="ดาวน์โหลดไฟล์">
                                     <i class="fa-solid fa-download"></i>
